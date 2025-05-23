@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Markdown } from './Markdown';
 import type { JSONValue } from 'ai';
 import Popover from '~/components/ui/Popover';
@@ -35,27 +35,21 @@ function normalizedFilePath(path: string) {
 }
 
 export const AssistantMessage = memo(({ content, annotations }: AssistantMessageProps) => {
-  const filteredAnnotations = (annotations?.filter(
+  const filteredAnnotations = useMemo(() => (annotations?.filter(
     (annotation: JSONValue) => annotation && typeof annotation === 'object' && Object.keys(annotation).includes('type'),
-  ) || []) as { type: string; value: any } & { [key: string]: any }[];
+  ) || []) as { type: string; value: any } & { [key: string]: any }[], [annotations]);
 
-  let chatSummary: string | undefined = undefined;
+  const chatSummary = useMemo(() => {
+    return filteredAnnotations.find((annotation) => annotation.type === 'chatSummary')?.summary;
+  }, [filteredAnnotations]);
 
-  if (filteredAnnotations.find((annotation) => annotation.type === 'chatSummary')) {
-    chatSummary = filteredAnnotations.find((annotation) => annotation.type === 'chatSummary')?.summary;
-  }
+  const codeContext = useMemo(() => {
+    return filteredAnnotations.find((annotation) => annotation.type === 'codeContext')?.files;
+  }, [filteredAnnotations]);
 
-  let codeContext: string[] | undefined = undefined;
-
-  if (filteredAnnotations.find((annotation) => annotation.type === 'codeContext')) {
-    codeContext = filteredAnnotations.find((annotation) => annotation.type === 'codeContext')?.files;
-  }
-
-  const usage: {
-    completionTokens: number;
-    promptTokens: number;
-    totalTokens: number;
-  } = filteredAnnotations.find((annotation) => annotation.type === 'usage')?.value;
+  const usage = useMemo(() => {
+    return filteredAnnotations.find((annotation) => annotation.type === 'usage')?.value;
+  }, [filteredAnnotations]);
 
   return (
     <div className="overflow-hidden w-full">
