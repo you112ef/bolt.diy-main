@@ -495,6 +495,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 <div
                   className={classNames(
                     'flex-1',
+                    'min-h-0', // Added this class
                     'overflow-y-auto',
                     'hover:overflow-y-auto',
                     'scrollbar scrollbar-w-2',
