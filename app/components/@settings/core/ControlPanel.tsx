@@ -437,7 +437,11 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
                 'rounded-2xl shadow-2xl',
                 'border border-[#E5E5E5] dark:border-[#1A1A1A]',
-                'flex flex-col overflow-hidden', // overflow-hidden might be an issue with max-h, will check content area
+                'flex flex-col overflow-y-auto touch-auto',
+                'scrollbar scrollbar-w-2',
+                'scrollbar-track-transparent',
+                'scrollbar-thumb-[#E5E5E5] hover:scrollbar-thumb-[#CCCCCC]',
+                'dark:scrollbar-thumb-[#333333] dark:hover:scrollbar-thumb-[#444444]',
                 'relative',
               )}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -448,7 +452,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
               <div className="absolute inset-0 overflow-hidden rounded-2xl">
                 <BackgroundRays />
               </div>
-              <div className="relative z-10 flex flex-col h-full">
+              <div className="relative z-10 flex flex-col"> {/* Removed h-full */}
                 {/* Header */}
                 <div className="flex items-center justify-between flex-wrap md:flex-nowrap px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-4">
@@ -492,20 +496,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 </div>
 
                 {/* Content */}
-                <div
-                  className={classNames(
-                    'flex-1',
-                    'min-h-0', // Added this class
-                    'overflow-y-auto',
-                    'hover:overflow-y-auto',
-                    'scrollbar scrollbar-w-2',
-                    'scrollbar-track-transparent',
-                    'scrollbar-thumb-[#E5E5E5] hover:scrollbar-thumb-[#CCCCCC]',
-                    'dark:scrollbar-thumb-[#333333] dark:hover:scrollbar-thumb-[#444444]',
-                    'will-change-scroll',
-                    'touch-auto',
-                  )}
-                >
+                <div> {/* Removed flex-1, min-h-0, overflow-y-auto, scrollbar classes, will-change-scroll */}
                   <motion.div
                     key={activeTab || 'home'}
                     initial={{ opacity: 0 }}
