@@ -556,8 +556,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </ClientOnly>
-                    <div className="flex justify-between items-center text-sm p-4 pt-2">
-                      <div className="flex gap-1 items-center">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-4 pt-2 gap-2">
+                      <div className="flex flex-wrap gap-1 items-center justify-center sm:justify-start">
                         <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
                           <div className="i-ph:paperclip text-xl"></div>
                         </IconButton>

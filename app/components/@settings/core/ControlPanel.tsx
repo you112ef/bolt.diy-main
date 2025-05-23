@@ -100,7 +100,7 @@ const AnimatedSwitch = ({ checked, onCheckedChange, id, label }: AnimatedSwitchP
         checked={checked}
         onCheckedChange={onCheckedChange}
         className={classNames(
-          'relative inline-flex h-6 w-11 items-center rounded-full',
+          'relative inline-flex h-7 w-12 items-center rounded-full',
           'transition-all duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)]',
           'bg-gray-200 dark:bg-gray-700',
           'data-[state=checked]:bg-purple-500',
@@ -112,7 +112,7 @@ const AnimatedSwitch = ({ checked, onCheckedChange, id, label }: AnimatedSwitchP
         <motion.span
           className={classNames(
             'absolute left-[2px] top-[2px]',
-            'inline-block h-5 w-5 rounded-full',
+            'inline-block h-6 w-6 rounded-full',
             'bg-white shadow-lg',
             'transition-shadow duration-300',
             'group-hover:shadow-md group-active:shadow-sm',
