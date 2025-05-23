@@ -602,7 +602,7 @@ function NodeButton({ depth, iconClasses, onClick, className, children }: Button
   return (
     <button
       className={classNames(
-        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-0.5',
+        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-2 cursor-pointer',
         className,
       )}
       style={{ paddingLeft: `${6 + depth * NODE_PADDING_LEFT}px` }}
