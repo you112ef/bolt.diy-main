@@ -62,7 +62,17 @@ export const IconButton = memo(
             onClick?.(event);
           }}
         >
-          {children ? children : <div className={classNames(icon, getIconSize(size), iconClassName)}></div>}
+          {children ? (
+            children
+          ) : (
+            <div
+              className={classNames(
+                icon,
+                size === 'xl' ? 'text-lg sm:text-xl' : getIconSize(size),
+                iconClassName,
+              )}
+            ></div>
+          )}
         </button>
       );
     },
