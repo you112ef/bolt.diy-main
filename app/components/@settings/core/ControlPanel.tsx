@@ -432,11 +432,12 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
           >
             <motion.div
               className={classNames(
-                'w-[1200px] h-[90vh]',
+                'w-full md:w-auto md:min-w-[calc(min(100vw-2rem,1200px))] max-w-[1200px] max-h-[90vh]',
+                'p-4 sm:p-6',
                 'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
                 'rounded-2xl shadow-2xl',
                 'border border-[#E5E5E5] dark:border-[#1A1A1A]',
-                'flex flex-col overflow-hidden',
+                'flex flex-col overflow-hidden', // overflow-hidden might be an issue with max-h, will check content area
                 'relative',
               )}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -449,7 +450,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
               </div>
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between flex-wrap md:flex-nowrap px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-4">
                     {(activeTab || showTabManagement) && (
                       <button
@@ -464,9 +465,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     </DialogTitle>
                   </div>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
                     {/* Mode Toggle */}
-                    <div className="flex items-center gap-2 min-w-[140px] border-r border-gray-200 dark:border-gray-800 pr-6">
+                    <div className="flex items-center gap-2 min-w-0 sm:min-w-[140px] border-r border-gray-200 dark:border-gray-800 pr-6">
                       <AnimatedSwitch
                         id="developer-mode"
                         checked={developerMode}
@@ -510,7 +511,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="p-6"
+                    className="p-2 sm:p-4 md:p-6"
                   >
                     {showTabManagement ? (
                       <TabManagement />
@@ -518,7 +519,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                       getTabComponent(activeTab)
                     ) : (
                       <motion.div
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 relative"
                         variants={gridLayoutVariants}
                         initial="hidden"
                         animate="visible"

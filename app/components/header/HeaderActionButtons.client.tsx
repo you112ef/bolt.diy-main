@@ -327,16 +327,23 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
   };
 
   return (
-    <div className="flex">
+    <div className="flex flex-wrap items-center gap-2">
       <div className="relative" ref={dropdownRef}>
-        <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden mr-2 text-sm">
+        <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden text-sm">
           <Button
             active
             disabled={isDeploying || !activePreview || isStreaming}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="px-4 hover:bg-bolt-elements-item-backgroundActive flex items-center gap-2"
           >
-            {isDeploying ? `Deploying to ${deployingTo}...` : 'Deploy'}
+            {isDeploying ? (
+              <>
+                <span className="hidden sm:inline">{`Deploying to ${deployingTo}...`}</span>
+                <span className="sm:hidden">{`Deploying...`}</span>
+              </>
+            ) : (
+              'Deploy'
+            )}
             <div
               className={classNames('i-ph:caret-down w-4 h-4 transition-transform', isDropdownOpen ? 'rotate-180' : '')}
             />
@@ -344,7 +351,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
         </div>
 
         {isDropdownOpen && (
-          <div className="absolute right-2 flex flex-col gap-1 z-50 p-1 mt-1 min-w-[13.5rem] bg-bolt-elements-background-depth-2 rounded-md shadow-lg bg-bolt-elements-backgroundDefault border border-bolt-elements-borderColor">
+          <div className="absolute right-2 flex flex-col gap-1 z-50 p-1 mt-1 min-w-[calc(min(100vw-2rem,13.5rem))] bg-bolt-elements-background-depth-2 rounded-md shadow-lg bg-bolt-elements-backgroundDefault border border-bolt-elements-borderColor">
             <Button
               active
               onClick={() => {

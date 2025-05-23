@@ -65,7 +65,7 @@ export default function ProfileTab() {
         {/* Personal Information Section */}
         <div>
           {/* Avatar Upload */}
-          <div className="flex items-start gap-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-8">
             <div
               className={classNames(
                 'w-24 h-24 rounded-full overflow-hidden',
