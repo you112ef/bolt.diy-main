@@ -89,7 +89,7 @@ export default function ProfileTab() {
                   )}
                 />
               ) : (
-                <div className="i-ph:robot-fill w-16 h-16 text-bolt-elements-textTertiary transition-colors group-hover:text-purple-500/70 transform -translate-y-1" /> {/* Updated color */}
+                <div className="i-ph:robot-fill w-16 h-16 text-bolt-elements-textTertiary transition-colors group-hover:text-purple-500/70 transform -translate-y-1" />
               )}
 
               <label
