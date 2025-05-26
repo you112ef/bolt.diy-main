@@ -21,20 +21,20 @@ const customIconCollection = iconPaths.reduce(
 
 const BASE_COLORS = {
   white: '#FFFFFF',
-  gray: { // Slightly cooler greys
-    50: '#F7F9FA',    // Lightest background
-    100: '#F0F2F5',
-    200: '#E3E7EB',
-    300: '#D1D7DE',
-    400: '#A0AAB8',
-    500: '#717C8E',    // Mid-grey for text/icons
-    600: '#505A6C',
-    700: '#3E4756',
-    800: '#2C3340',
-    900: '#1A1F2A',
-    950: '#0D1017',    // Darkest background
+  gray: { // Reverted to original neutral greys for better clarity
+    50: '#FAFAFA',
+    100: '#F5F5F5',
+    200: '#E5E5E5',
+    300: '#D4D4D4',
+    400: '#A3A3A3',
+    500: '#737373',
+    600: '#525252',
+    700: '#404040',
+    800: '#262626',
+    900: '#171717',
+    950: '#0A0A0A',
   },
-  accent: { // Shifted to be more vibrant, using existing darker shades as new mid-tones
+  accent: { // Kept the more vibrant purple for now, as it's often used as text color
     50: '#F7F3FF',    // Lighter purple, adjusted for new scale
     100: '#EDE7FF',
     200: '#D9CBFF',

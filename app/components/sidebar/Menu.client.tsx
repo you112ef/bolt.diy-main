@@ -245,7 +245,8 @@ export const Menu = () => {
           </div>
         </div>
         <CurrentDateTime />
-        <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
+        {/* Removed h-full and overflow-hidden from this div, relying on flex-1 to manage height */}
+        <div className="flex-1 flex flex-col w-full">
           <div className="p-4 space-y-3">
             <a
               href="/"

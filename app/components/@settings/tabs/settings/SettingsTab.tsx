@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useStore } from '@nanostores/react'; // Import useStore
 import { classNames } from '~/utils/classNames';
 import { Switch } from '~/components/ui/Switch';
+import { profileStore, updateProfile } from '~/lib/stores/profile'; // Import profileStore and updateProfile
 import type { UserProfile } from '~/components/@settings/core/types';
 import { isMac } from '~/utils/os';
 
@@ -22,48 +24,37 @@ const getModifierSymbol = (modifier: string): string => {
 
 export default function SettingsTab() {
   const [currentTimezone, setCurrentTimezone] = useState('');
-  const [settings, setSettings] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('bolt_user_profile');
-    return saved
-      ? JSON.parse(saved)
-      : {
-          notifications: true,
-          language: 'en',
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        };
-  });
+  const $profile = useStore(profileStore); // Use profileStore
+
+  // Initialize local state from profileStore or defaults
+  const [language, setLanguage] = useState($profile.language || 'en');
+  const [notifications, setNotifications] = useState($profile.notifications === undefined ? true : $profile.notifications);
+  const [timezone, setTimezone] = useState($profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   useEffect(() => {
     setCurrentTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  }, []);
+    // Update local state if profileStore changes from another source
+    setLanguage($profile.language || 'en');
+    setNotifications($profile.notifications === undefined ? true : $profile.notifications);
+    setTimezone($profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, [$profile]);
 
-  // Save settings automatically when they change
-  useEffect(() => {
-    try {
-      // Get existing profile data
-      const existingProfile = JSON.parse(localStorage.getItem('bolt_user_profile') || '{}');
+  const handleSettingChange = (key: keyof UserProfile, value: any) => {
+    // Update local state immediately for UI responsiveness
+    if (key === 'language') setLanguage(value);
+    if (key === 'notifications') setNotifications(value);
+    if (key === 'timezone') setTimezone(value);
 
-      // Merge with new settings
-      const updatedProfile = {
-        ...existingProfile,
-        notifications: settings.notifications,
-        language: settings.language,
-        timezone: settings.timezone,
-      };
-
-      localStorage.setItem('bolt_user_profile', JSON.stringify(updatedProfile));
-      toast.success('Settings updated');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Failed to update settings');
-    }
-  }, [settings]);
+    // Update profileStore
+    updateProfile({ [key]: value });
+    toast.success(`${key.charAt(0).toUpperCase() + key.slice(1)} updated`);
+  };
 
   return (
     <div className="space-y-4">
       {/* Language & Notifications */}
       <motion.div
-        className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-sm dark:shadow-none p-4 space-y-4"
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4 space-y-4" // Removed dark:shadow-none as it's default
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -79,12 +70,11 @@ export default function SettingsTab() {
             <label className="block text-sm text-bolt-elements-textSecondary">Language</label>
           </div>
           <select
-            value={settings.language}
-            onChange={(e) => setSettings((prev) => ({ ...prev, language: e.target.value }))}
+            value={language}
+            onChange={(e) => handleSettingChange('language', e.target.value)}
             className={classNames(
               'w-full px-3 py-2 rounded-lg text-sm',
-              'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
-              'border border-[#E5E5E5] dark:border-[#1A1A1A]',
+              'bg-bolt-elements-bg-depth-2 border border-bolt-elements-borderColor', // Updated colors
               'text-bolt-elements-textPrimary',
               'focus:outline-none focus:ring-2 focus:ring-purple-500/30',
               'transition-all duration-200',
@@ -110,32 +100,11 @@ export default function SettingsTab() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-bolt-elements-textSecondary">
-              {settings.notifications ? 'Notifications are enabled' : 'Notifications are disabled'}
+              {notifications ? 'Notifications are enabled' : 'Notifications are disabled'}
             </span>
             <Switch
-              checked={settings.notifications}
-              onCheckedChange={(checked) => {
-                // Update local state
-                setSettings((prev) => ({ ...prev, notifications: checked }));
-
-                // Update localStorage immediately
-                const existingProfile = JSON.parse(localStorage.getItem('bolt_user_profile') || '{}');
-                const updatedProfile = {
-                  ...existingProfile,
-                  notifications: checked,
-                };
-                localStorage.setItem('bolt_user_profile', JSON.stringify(updatedProfile));
-
-                // Dispatch storage event for other components
-                window.dispatchEvent(
-                  new StorageEvent('storage', {
-                    key: 'bolt_user_profile',
-                    newValue: JSON.stringify(updatedProfile),
-                  }),
-                );
-
-                toast.success(`Notifications ${checked ? 'enabled' : 'disabled'}`);
-              }}
+              checked={notifications}
+              onCheckedChange={(checked) => handleSettingChange('notifications', checked)}
             />
           </div>
         </div>
@@ -143,7 +112,7 @@ export default function SettingsTab() {
 
       {/* Timezone */}
       <motion.div
-        className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-sm dark:shadow-none p-4"
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4" // Removed dark:shadow-none
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -159,12 +128,11 @@ export default function SettingsTab() {
             <label className="block text-sm text-bolt-elements-textSecondary">Timezone</label>
           </div>
           <select
-            value={settings.timezone}
-            onChange={(e) => setSettings((prev) => ({ ...prev, timezone: e.target.value }))}
+            value={timezone}
+            onChange={(e) => handleSettingChange('timezone', e.target.value)}
             className={classNames(
               'w-full px-3 py-2 rounded-lg text-sm',
-              'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
-              'border border-[#E5E5E5] dark:border-[#1A1A1A]',
+              'bg-bolt-elements-bg-depth-2 border border-bolt-elements-borderColor', // Updated colors
               'text-bolt-elements-textPrimary',
               'focus:outline-none focus:ring-2 focus:ring-purple-500/30',
               'transition-all duration-200',
@@ -177,7 +145,7 @@ export default function SettingsTab() {
 
       {/* Simplified Keyboard Shortcuts */}
       <motion.div
-        className="bg-white dark:bg-[#0A0A0A] rounded-lg shadow-sm dark:shadow-none p-4"
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4" // Removed dark:shadow-none
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -188,22 +156,22 @@ export default function SettingsTab() {
         </div>
 
         <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between p-2 rounded-lg bg-[#FAFAFA] dark:bg-[#1A1A1A]">
+          <div className="flex flex-wrap items-center justify-between p-2 rounded-lg bg-bolt-elements-bg-depth-2"> {/* Updated colors */}
             <div className="flex flex-col">
               <span className="text-sm text-bolt-elements-textPrimary">Toggle Theme</span>
               <span className="text-xs text-bolt-elements-textSecondary">Switch between light and dark mode</span>
             </div>
             <div className="flex items-center gap-1">
-              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-white dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#1A1A1A] rounded shadow-sm">
+              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-bolt-elements-bg-depth-1 border border-bolt-elements-borderColor rounded shadow-sm"> {/* Updated colors */}
                 {getModifierSymbol('meta')}
               </kbd>
-              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-white dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#1A1A1A] rounded shadow-sm">
+              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-bolt-elements-bg-depth-1 border border-bolt-elements-borderColor rounded shadow-sm"> {/* Updated colors */}
                 {getModifierSymbol('alt')}
               </kbd>
-              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-white dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#1A1A1A] rounded shadow-sm">
+              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-bolt-elements-bg-depth-1 border border-bolt-elements-borderColor rounded shadow-sm"> {/* Updated colors */}
                 {getModifierSymbol('shift')}
               </kbd>
-              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-white dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#1A1A1A] rounded shadow-sm">
+              <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-bolt-elements-bg-depth-1 border border-bolt-elements-borderColor rounded shadow-sm"> {/* Updated colors */}
                 D
               </kbd>
             </div>
