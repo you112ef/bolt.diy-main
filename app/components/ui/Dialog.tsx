@@ -22,7 +22,7 @@ export const DialogButton = memo(({ type, children, onClick, disabled }: DialogB
   return (
     <button
       className={classNames(
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors',
+        'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors', // Reduced padding
         type === 'primary'
           ? 'bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600'
           : type === 'secondary'
@@ -40,7 +40,7 @@ export const DialogButton = memo(({ type, children, onClick, disabled }: DialogB
 export const DialogTitle = memo(({ className, children, ...props }: RadixDialog.DialogTitleProps) => {
   return (
     <RadixDialog.Title
-      className={classNames('text-lg font-medium text-bolt-elements-textPrimary flex items-center gap-2', className)}
+      className={classNames('text-base font-semibold text-bolt-elements-textPrimary flex items-center gap-2', className)} // Reduced font size, increased weight
       {...props}
     >
       {children}
@@ -208,10 +208,10 @@ export function ConfirmationDialog({
   return (
     <RadixDialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog showCloseButton={false}>
-        <div className="p-6 bg-white dark:bg-gray-950 relative z-10">
+        <div className="p-4 bg-white dark:bg-gray-950 relative z-10"> {/* Reduced p-6 to p-4 */}
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="mb-4">{description}</DialogDescription>
-          <div className="flex justify-end space-x-2">
+          <DialogDescription className="mb-3">{description}</DialogDescription> {/* Reduced mb-4 to mb-3 */}
+          <div className="flex justify-end space-x-1.5"> {/* Reduced space-x-2 to space-x-1.5 */}
             <Button variant="outline" onClick={onClose} disabled={isLoading}>
               {cancelLabel}
             </Button>
@@ -334,8 +334,8 @@ export function SelectionDialog({
 
   // Calculate the height for the virtualized list
   const listHeight = Math.min(
-    items.length * 60,
-    parseInt(maxHeight.replace('vh', '')) * window.innerHeight * 0.01 - 40,
+    items.length * 52, // Reduced item size assumption for denser list
+    parseInt(maxHeight.replace('vh', '')) * window.innerHeight * 0.01 - 40, // Keep overall constraint
   );
 
   // Render each item in the virtualized list
@@ -345,7 +345,7 @@ export function SelectionDialog({
       <div
         key={item.id}
         className={classNames(
-          'flex items-start space-x-3 p-2 rounded-md transition-colors',
+          'flex items-start space-x-2 p-1.5 rounded-md transition-colors', // Reduced space-x-3 to space-x-2, p-2 to p-1.5
           selectedItems.includes(item.id)
             ? 'bg-bolt-elements-item-backgroundAccent'
             : 'bg-bolt-elements-bg-depth-2 hover:bg-bolt-elements-item-backgroundActive',
@@ -361,11 +361,11 @@ export function SelectionDialog({
           checked={selectedItems.includes(item.id)}
           onCheckedChange={() => handleToggleItem(item.id)}
         />
-        <div className="grid gap-1.5 leading-none">
+        <div className="grid gap-1 leading-none"> {/* Reduced gap-1.5 to gap-1 */}
           <Label
             htmlFor={`item-${item.id}`}
             className={classNames(
-              'text-sm font-medium cursor-pointer',
+              'text-sm font-medium cursor-pointer', // Font size will be affected by global changes
               selectedItems.includes(item.id)
                 ? 'text-bolt-elements-item-contentAccent'
                 : 'text-bolt-elements-textPrimary',
@@ -382,15 +382,15 @@ export function SelectionDialog({
   return (
     <RadixDialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog showCloseButton={false}>
-        <div className="p-6 bg-white dark:bg-gray-950 relative z-10">
+        <div className="p-4 bg-white dark:bg-gray-950 relative z-10"> {/* Reduced p-6 to p-4 */}
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="mt-2 mb-4">
+          <DialogDescription className="mt-1.5 mb-3"> {/* Reduced mt-2 mb-4 to mt-1.5 mb-3 */}
             Select the items you want to include and click{' '}
             <span className="text-bolt-elements-item-contentAccent font-medium">{confirmLabel}</span>.
           </DialogDescription>
 
-          <div className="py-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="py-3"> {/* Reduced py-4 to py-3 */}
+            <div className="flex items-center justify-between mb-3"> {/* Reduced mb-4 to mb-3 */}
               <span className="text-sm font-medium text-bolt-elements-textSecondary">
                 {selectedItems.length} of {items.length} selected
               </span>

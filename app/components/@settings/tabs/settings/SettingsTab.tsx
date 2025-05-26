@@ -51,21 +51,21 @@ export default function SettingsTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3"> {/* Reduced space-y-4 to space-y-3 */}
       {/* Language & Notifications */}
       <motion.div
-        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4 space-y-4" // Removed dark:shadow-none as it's default
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-3 space-y-3" // Reduced p-4 to p-3, space-y-4 to space-y-3
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3"> {/* Reduced mb-4 to mb-3 */}
           <div className="i-ph:palette-fill w-4 h-4 text-purple-500" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Preferences</span>
         </div>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1.5"> {/* Reduced mb-2 to mb-1.5 */}
             <div className="i-ph:translate-fill w-4 h-4 text-bolt-elements-textSecondary" />
             <label className="block text-sm text-bolt-elements-textSecondary">Language</label>
           </div>
@@ -94,7 +94,7 @@ export default function SettingsTab() {
         </div>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1.5"> {/* Reduced mb-2 to mb-1.5 */}
             <div className="i-ph:bell-fill w-4 h-4 text-bolt-elements-textSecondary" />
             <label className="block text-sm text-bolt-elements-textSecondary">Notifications</label>
           </div>
@@ -112,18 +112,18 @@ export default function SettingsTab() {
 
       {/* Timezone */}
       <motion.div
-        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4" // Removed dark:shadow-none
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-3" // Reduced p-4 to p-3
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3"> {/* Reduced mb-4 to mb-3 */}
           <div className="i-ph:clock-fill w-4 h-4 text-purple-500" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Time Settings</span>
         </div>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1.5"> {/* Reduced mb-2 to mb-1.5 */}
             <div className="i-ph:globe-fill w-4 h-4 text-bolt-elements-textSecondary" />
             <label className="block text-sm text-bolt-elements-textSecondary">Timezone</label>
           </div>
@@ -145,21 +145,21 @@ export default function SettingsTab() {
 
       {/* Simplified Keyboard Shortcuts */}
       <motion.div
-        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-4" // Removed dark:shadow-none
+        className="bg-bolt-elements-bg-depth-1 rounded-lg shadow-sm p-3" // Reduced p-4 to p-3
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3"> {/* Reduced mb-4 to mb-3 */}
           <div className="i-ph:keyboard-fill w-4 h-4 text-purple-500" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Keyboard Shortcuts</span>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between p-2 rounded-lg bg-bolt-elements-bg-depth-2"> {/* Updated colors */}
+        <div className="space-y-1.5"> {/* Reduced space-y-2 to space-y-1.5 */}
+          <div className="flex flex-wrap items-center justify-between p-1.5 rounded-lg bg-bolt-elements-bg-depth-2"> {/* Reduced p-2 to p-1.5 */}
             <div className="flex flex-col">
               <span className="text-sm text-bolt-elements-textPrimary">Toggle Theme</span>
-              <span className="text-xs text-bolt-elements-textSecondary">Switch between light and dark mode</span>
+              <span className="text-xs text-bolt-elements-textSecondary">Switch between light and dark mode</span> {/* Text size already small */}
             </div>
             <div className="flex items-center gap-1">
               <kbd className="px-2 py-1 text-xs font-semibold text-bolt-elements-textSecondary bg-bolt-elements-bg-depth-1 border border-bolt-elements-borderColor rounded shadow-sm"> {/* Updated colors */}

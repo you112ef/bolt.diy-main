@@ -61,14 +61,14 @@ export default function ProfileTab() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="space-y-6">
+      <div className="space-y-4"> {/* Reduced space-y-6 to space-y-4 */}
         {/* Personal Information Section */}
         <div>
           {/* Avatar Upload */}
-          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-6"> {/* Reduced gap and mb */}
             <div
               className={classNames(
-                'w-24 h-24 rounded-full overflow-hidden',
+                'w-24 h-24 rounded-full overflow-hidden', // Avatar size kept as is for visual prominence
                 'bg-bolt-elements-bg-depth-2', // Updated color
                 'flex items-center justify-center',
                 'ring-1 ring-bolt-elements-borderColor', // Updated color
@@ -125,20 +125,20 @@ export default function ProfileTab() {
           </div>
 
           {/* Username Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">Username</label> {/* Updated color */}
+          <div className="mb-4"> {/* Reduced mb-6 to mb-4 */}
+            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-1.5">Username</label> {/* Reduced mb-2 to mb-1.5 */}
             <div className="relative group">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                <div className="i-ph:user-circle-fill w-5 h-5 text-bolt-elements-textTertiary transition-colors group-focus-within:text-purple-500" /> {/* Updated color */}
+                <div className="i-ph:user-circle-fill w-5 h-5 text-bolt-elements-textTertiary transition-colors group-focus-within:text-purple-500" />
               </div>
               <input
                 type="text"
                 value={profile.username}
                 onChange={(e) => handleProfileUpdate('username', e.target.value)}
                 className={classNames(
-                  'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                  'bg-bolt-elements-bg-depth-1', // Updated color
-                  'border border-bolt-elements-borderColor', // Updated color
+                  'w-full pl-11 pr-4 py-2 rounded-xl', // Reduced py-2.5 to py-2
+                  'bg-bolt-elements-bg-depth-1',
+                  'border border-bolt-elements-borderColor',
                   'text-bolt-elements-textPrimary', // Updated color
                   'placeholder-bolt-elements-textTertiary', // Updated color
                   'focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50',
@@ -150,19 +150,19 @@ export default function ProfileTab() {
           </div>
 
           {/* Bio Input */}
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-2">Bio</label> {/* Updated color */}
+          <div className="mb-4"> {/* Reduced mb-8 to mb-4 */}
+            <label className="block text-sm font-medium text-bolt-elements-textPrimary mb-1.5">Bio</label> {/* Reduced mb-2 to mb-1.5 */}
             <div className="relative group">
               <div className="absolute left-3.5 top-3">
-                <div className="i-ph:text-aa w-5 h-5 text-bolt-elements-textTertiary transition-colors group-focus-within:text-purple-500" /> {/* Updated color */}
+                <div className="i-ph:text-aa w-5 h-5 text-bolt-elements-textTertiary transition-colors group-focus-within:text-purple-500" />
               </div>
               <textarea
                 value={profile.bio}
                 onChange={(e) => handleProfileUpdate('bio', e.target.value)}
                 className={classNames(
-                  'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                  'bg-bolt-elements-bg-depth-1', // Updated color
-                  'border border-bolt-elements-borderColor', // Updated color
+                  'w-full pl-11 pr-4 py-2 rounded-xl', // Reduced py-2.5 to py-2
+                  'bg-bolt-elements-bg-depth-1',
+                  'border border-bolt-elements-borderColor',
                   'text-bolt-elements-textPrimary', // Updated color
                   'placeholder-bolt-elements-textTertiary', // Updated color
                   'focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50',

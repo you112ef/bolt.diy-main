@@ -322,7 +322,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         <div ref={scrollRef} className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
-              <div id="intro" className="mt-[8vh] sm:mt-[12vh] lg:mt-[16vh] max-w-chat mx-auto text-center px-4 sm:px-6 lg:px-0">
+              <div id="intro" className="mt-[8vh] sm:mt-[12vh] lg:mt-[16vh] max-w-chat mx-auto text-center px-3 sm:px-4 lg:px-0"> {/* Reduced padding */}
                 <h1 className="text-2xl sm:text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
                   Where ideas begin
                 </h1>
@@ -332,7 +332,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             )}
             <div
-              className={classNames('pt-4 px-2 sm:px-4 md:px-6', {
+              className={classNames('pt-3 px-2 sm:px-3 md:px-4', { /* Reduced padding */
                 'h-full flex flex-col': chatStarted,
               })}
               ref={scrollRef}
@@ -379,7 +379,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {progressAnnotations && <ProgressCompilation data={progressAnnotations} />}
                 <div
                   className={classNames(
-                    'bg-bolt-elements-background-depth-2 p-2 sm:p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+                    'bg-bolt-elements-background-depth-2 p-1.5 sm:p-2 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt', // Reduced padding
 
                     /*
                      * {
@@ -470,7 +470,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <textarea
                       ref={textareaRef}
                       className={classNames(
-                        'w-full pl-3 pt-3 pr-12 sm:pl-4 sm:pt-4 sm:pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm', // Changed from text-xs sm:text-sm
+                        'w-full pl-2.5 pt-2.5 pr-10 sm:pl-3 sm:pt-3 sm:pr-14 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm', // Reduced padding
                         'transition-all duration-200',
                         'hover:border-bolt-elements-focus',
                       )}
@@ -556,7 +556,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </ClientOnly>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-2 sm:p-4 sm:pt-2 gap-1 sm:gap-2">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm p-1.5 sm:p-3 sm:pt-1.5 gap-1 sm:gap-2"> {/* Reduced padding */}
                       <div className="flex flex-wrap gap-1 items-center justify-center sm:justify-start">
                         <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
                           <div className="i-ph:paperclip text-lg sm:text-xl"></div>

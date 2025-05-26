@@ -1,5 +1,6 @@
 import type { Message } from 'ai';
-import { Fragment } from 'react';
+import { Fragment, useCallback, useEffect, useRef } from 'react'; // Added useRef, useEffect, useCallback
+import { useVirtualizer } from '@tanstack/react-virtual'; // Import useVirtualizer
 import { classNames } from '~/utils/classNames';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
@@ -25,26 +26,59 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
     const { id, isStreaming = false, messages = [] } = props;
     const location = useLocation();
     const profile = useStore(profileStore);
+    const parentScrollRef = useRef<HTMLDivElement>(null);
 
-    const handleRewind = (messageId: string) => {
+    // Attach the forwarded ref to the parentScrollRef if provided
+    useEffect(() => {
+      if (typeof ref === 'function') {
+        ref(parentScrollRef.current);
+      } else if (ref) {
+        ref.current = parentScrollRef.current;
+      }
+    }, [ref]);
+
+    const rowVirtualizer = useVirtualizer({
+      count: messages.length,
+      getScrollElement: () => parentScrollRef.current,
+      estimateSize: () => 100, // Estimate 100px per message, can be dynamic
+      overscan: 5,
+    });
+
+    const virtualMessages = rowVirtualizer.getVirtualItems();
+
+    // Auto-scroll to bottom for new messages
+    useEffect(() => {
+      if (messages.length > 0) {
+        // Basic auto-scroll, could be improved with "isAtBottom" check
+        rowVirtualizer.scrollToIndex(messages.length - 1, { align: 'end', behavior: 'smooth' });
+      }
+    }, [messages.length, rowVirtualizer]);
+
+
+    const handleRewind = useCallback((messageId: string) => {
       const searchParams = new URLSearchParams(location.search);
       searchParams.set('rewindTo', messageId);
       window.location.search = searchParams.toString();
-    };
+    }, [location.search]);
 
-    const handleFork = async (messageId: string) => {
+    const handleFork = useCallback(async (messageId: string) => {
       try {
         if (!db || !chatId.get()) {
           toast.error('Chat persistence is not available');
           return;
         }
-
-        const urlId = await forkChat(db, chatId.get()!, messageId);
+        // Assuming chatId.get() provides a stable reference or is a primitive
+        const currentChatId = chatId.get();
+        if (!currentChatId) {
+          toast.error('Current chat ID not found for forking.');
+          return;
+        }
+        const urlId = await forkChat(db, currentChatId, messageId);
         window.location.href = `/chat/${urlId}`;
       } catch (error) {
         toast.error('Failed to fork chat: ' + (error as Error).message);
       }
-    };
+    }, []); // db might need to be a dependency if it can change, but it's likely stable.
 
     return (
       <div id={id} className={props.className} ref={ref}>

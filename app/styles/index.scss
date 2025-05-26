@@ -14,20 +14,20 @@ body {
 }
 
 html {
-  font-size: 14px; /* Base for small screens */
+  font-size: 13px; /* Base for small screens - Reduced from 14px */
 }
 
 /* Small devices (landscape phones, 640px and up) */
 @media (min-width: 640px) {
   html {
-    font-size: 15px;
+    font-size: 14px; /* Reduced from 15px */
   }
 }
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
   html {
-    font-size: 16px; /* Default for larger screens */
+    font-size: 15px; /* Default for larger screens - Reduced from 16px */
   }
 }
 

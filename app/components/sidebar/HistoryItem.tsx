@@ -4,7 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { type ChatHistoryItem } from '~/lib/persistence';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatDescription } from '~/lib/hooks';
-import { forwardRef, type ForwardedRef } from 'react';
+import { forwardRef, type ForwardedRef, memo } from 'react'; // Import memo
 
 interface HistoryItemProps {
   item: ChatHistoryItem;
@@ -13,7 +13,8 @@ interface HistoryItemProps {
   exportChat: (id?: string) => void;
 }
 
-export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) {
+// Wrap HistoryItem with React.memo
+export const HistoryItem = memo(function HistoryItem({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) {
   const { id: urlId } = useParams();
   const isActiveChat = urlId === item.urlId;
 
@@ -27,7 +28,7 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
   return (
     <div
       className={classNames(
-        'group rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/80 dark:hover:bg-gray-800/30 overflow-hidden flex justify-between items-center px-3 py-2 transition-colors',
+        'group rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/80 dark:hover:bg-gray-800/30 overflow-hidden flex justify-between items-center px-3 py-1.5 transition-colors', // Reduced py-2 to py-1.5
         { 'text-gray-900 dark:text-white bg-gray-50/80 dark:bg-gray-800/30': isActiveChat },
       )}
     >
@@ -100,9 +101,10 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
       )}
     </div>
   );
-}
+});
 
-const ChatActionButton = forwardRef(
+// Wrap ChatActionButton with React.memo
+const ChatActionButton = memo(forwardRef(
   (
     {
       toolTipContent,

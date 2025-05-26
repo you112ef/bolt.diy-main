@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@nanostores/react';
 import { toast } from 'react-toastify';
+import { useVirtualizer } from '@tanstack/react-virtual'; // Import useVirtualizer
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
@@ -93,11 +94,27 @@ export const Menu = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
   const { t } = useTranslation();
-  const [currentIsMobile, setCurrentIsMobile] = useState(false);
+  const parentScrollRef = useRef<HTMLDivElement>(null); // Ref for the scrollable parent
+
+  // Initialize currentIsMobile directly if on client, fallback for SSR (though ClientOnly helps)
+  const [currentIsMobile, setCurrentIsMobile] = useState(
+    typeof window !== 'undefined' ? isMobile() : false
+  );
+
+  const activeVariants = useMemo(() => {
+    return currentIsMobile ? menuVariantsMobile : menuVariantsDesktop;
+  }, [currentIsMobile]);
 
   useEffect(() => {
-    setCurrentIsMobile(isMobile());
-    const handleResize = () => setCurrentIsMobile(isMobile());
+    // Ensure it's set correctly after mount and set up resize listener
+    if (typeof window !== 'undefined') {
+      setCurrentIsMobile(isMobile());
+    }
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setCurrentIsMobile(isMobile());
+      }
+    }
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -106,6 +123,28 @@ export const Menu = () => {
     items: list,
     searchFields: ['description'],
   });
+
+  // Flattened list for virtualization
+  const displayItems = useMemo(() => {
+    const flatList: Array<{ type: 'category'; id: string; data: string } | { type: 'item'; id: string; data: ChatHistoryItem }> = [];
+    const binned = binDates(filteredList);
+    binned.forEach(({ category, items }) => {
+      flatList.push({ type: 'category', id: category, data: category });
+      items.forEach(item => {
+        flatList.push({ type: 'item', id: item.id, data: item });
+      });
+    });
+    return flatList;
+  }, [filteredList]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: displayItems.length,
+    getScrollElement: () => parentScrollRef.current,
+    estimateSize: (index) => (displayItems[index].type === 'category' ? 24 : 28), // 24px for category, 28px for item
+    overscan: 10,
+  });
+
+  const virtualHistoryItems = rowVirtualizer.getVirtualItems();
 
   const loadEntries = useCallback(() => {
     if (db) {
@@ -199,7 +238,7 @@ export const Menu = () => {
         ref={menuRef}
         initial="closed"
         animate={$isSidebarOpen ? 'open' : 'closed'}
-        variants={currentIsMobile ? menuVariantsMobile : menuVariantsDesktop}
+        variants={activeVariants} // Use memoized variants
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
           'bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50',
@@ -247,10 +286,10 @@ export const Menu = () => {
         <CurrentDateTime />
         {/* Removed h-full and overflow-hidden from this div, relying on flex-1 to manage height */}
         <div className="flex-1 flex flex-col w-full">
-          <div className="p-4 space-y-3">
+          <div className="p-3 space-y-2"> {/* Reduced p-4 to p-3, space-y-3 to space-y-2 */}
             <a
               href="/"
-              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-4 py-2 transition-colors"
+              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-3 py-1.5 transition-colors" /* Reduced px-4 py-2 to px-3 py-1.5 */
             >
               <span className="inline-block i-lucide:message-square h-4 w-4" />
               <span className="text-sm font-medium">{t('startNewChat')}</span>
@@ -268,34 +307,73 @@ export const Menu = () => {
               />
             </div>
           </div>
-          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium px-4 py-2">{t('yourChatsTitle')}</div>
-          <div className="flex-1 overflow-auto px-3 pb-3">
-            {filteredList.length === 0 && (
-              <div className="px-4 text-gray-500 dark:text-gray-400 text-sm">
+          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium px-3 py-1.5">{t('yourChatsTitle')}</div>
+          <div ref={parentScrollRef} className="flex-1 overflow-auto px-3 pb-3"> {/* Added ref */}
+            {displayItems.length === 0 && ( // Check displayItems for emptiness
+              <div className="px-3 text-gray-500 dark:text-gray-400 text-sm">
                 {list.length === 0 ? t('noPreviousConversations') : t('noMatchesFound')}
               </div>
             )}
+            {displayItems.length > 0 && (
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualHistoryItems.map((virtualRow) => {
+                  const node = displayItems[virtualRow.index];
+                  if (node.type === 'category') {
+                    return (
+                      <div
+                        key={node.id}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                        className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-950 px-4 py-1 z-1" // Removed sticky, top-0. Ensure z-index if needed.
+                      >
+                        {node.data}
+                      </div>
+                    );
+                  } else { // type === 'item'
+                    const historyItem = node.data as ChatHistoryItem;
+                    return (
+                      <div
+                        key={node.id}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                        className="mt-2 first:mt-0" // Apply spacing similar to original (might need adjustment)
+                      >
+                        <div className="space-y-0.5 pr-1">
+                           <HistoryItem
+                              item={historyItem}
+                              exportChat={exportChat}
+                              onDelete={(event) => handleDeleteClick(event, historyItem)}
+                              onDuplicate={() => handleDuplicate(historyItem.id)}
+                            />
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            )}
             <DialogRoot open={dialogContent !== null}>
-              {binDates(filteredList).map(({ category, items }) => (
-                <div key={category} className="mt-2 first:mt-0 space-y-1">
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 sticky top-0 z-1 bg-white dark:bg-gray-950 px-4 py-1">
-                    {category}
-                  </div>
-                  <div className="space-y-0.5 pr-1">
-                    {items.map((item) => (
-                      <HistoryItem
-                        key={item.id}
-                        item={item}
-                        exportChat={exportChat}
-                        onDelete={(event) => handleDeleteClick(event, item)}
-                        onDuplicate={() => handleDuplicate(item.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
+              {/* Dialog content remains, but it's not part of the virtualized list */}
               <Dialog onBackdrop={closeDialog} onClose={closeDialog}>
-                {dialogContent?.type === 'delete' && (
+                {dialogContent?.type === 'delete' && dialogContent.item && ( // Ensure item is present
                   <>
                     <div className="p-6 bg-white dark:bg-gray-950">
                       <DialogTitle className="text-gray-900 dark:text-white">{t('deleteChatTitle')}</DialogTitle>
@@ -329,7 +407,7 @@ export const Menu = () => {
               </Dialog>
             </DialogRoot>
           </div>
-          <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 px-4 py-3">
+          <div className="flex items-center justify-between border-t border-bolt-elements-borderColor px-3 py-2"> {/* Reduced px-4 py-3 to px-3 py-2, used theme border */}
             <SettingsButton onClick={handleSettingsClick} />
             <ThemeSwitch />
           </div>

@@ -473,7 +473,7 @@ function FileContextMenu({
   );
 }
 
-function Folder({ folder, collapsed, selected = false, onCopyPath, onCopyRelativePath, onClick }: FolderProps) {
+const Folder = memo(function Folder({ folder, collapsed, selected = false, onCopyPath, onCopyRelativePath, onClick }: FolderProps) {
   return (
     <FileContextMenu onCopyPath={onCopyPath} onCopyRelativePath={onCopyRelativePath} fullPath={folder.fullPath}>
       <NodeButton
@@ -493,7 +493,7 @@ function Folder({ folder, collapsed, selected = false, onCopyPath, onCopyRelativ
       </NodeButton>
     </FileContextMenu>
   );
-}
+});
 
 interface FileProps {
   file: FileNode;
@@ -505,7 +505,7 @@ interface FileProps {
   onClick: () => void;
 }
 
-function File({
+const File = memo(function File({
   file,
   onClick,
   onCopyPath,
@@ -588,7 +588,7 @@ function File({
       </NodeButton>
     </FileContextMenu>
   );
-}
+});
 
 interface ButtonProps {
   depth: number;
