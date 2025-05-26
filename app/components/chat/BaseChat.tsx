@@ -470,7 +470,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <textarea
                       ref={textareaRef}
                       className={classNames(
-                        'w-full pl-3 pt-3 pr-12 sm:pl-4 sm:pt-4 sm:pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-xs sm:text-sm',
+                        'w-full pl-3 pt-3 pr-12 sm:pl-4 sm:pt-4 sm:pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm', // Changed from text-xs sm:text-sm
                         'transition-all duration-200',
                         'hover:border-bolt-elements-focus',
                       )}

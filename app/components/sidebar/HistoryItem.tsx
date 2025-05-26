@@ -59,10 +59,10 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
               { 'bg-gray-50/80 dark:bg-gray-800/30': isActiveChat },
             )}
           >
-            <div className="flex items-center gap-2.5 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1"> {/* Reduced gap slightly to accommodate larger buttons if needed */}
               <ChatActionButton
                 toolTipContent="Export"
-                icon="i-ph:download-simple h-4 w-4"
+                icon="i-ph:download-simple" // Icon size class (h-4 w-4 or h-5 w-5) now applied inside ChatActionButton
                 onClick={(event) => {
                   event.preventDefault();
                   exportChat(item.id);
@@ -71,13 +71,13 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
               {onDuplicate && (
                 <ChatActionButton
                   toolTipContent="Duplicate"
-                  icon="i-ph:copy h-4 w-4"
+                  icon="i-ph:copy" // Icon size class now applied inside
                   onClick={() => onDuplicate?.(item.id)}
                 />
               )}
               <ChatActionButton
                 toolTipContent="Rename"
-                icon="i-ph:pencil-fill h-4 w-4"
+                icon="i-ph:pencil-fill" // Icon size class now applied inside
                 onClick={(event) => {
                   event.preventDefault();
                   toggleEditMode();
@@ -86,8 +86,8 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
               <Dialog.Trigger asChild>
                 <ChatActionButton
                   toolTipContent="Delete"
-                  icon="i-ph:trash h-4 w-4"
-                  className="hover:text-red-500"
+                  icon="i-ph:trash" // Icon size class now applied inside
+                  className="hover:text-red-500 dark:hover:text-red-400" // Ensure dark mode hover for delete
                   onClick={(event) => {
                     event.preventDefault();
                     onDelete?.(event);
@@ -111,7 +111,7 @@ const ChatActionButton = forwardRef(
       onClick,
     }: {
       toolTipContent: string;
-      icon: string;
+      icon: string; // Will now only be the icon name, e.g., "i-ph:trash"
       className?: string;
       onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
       btnTitle?: string;
@@ -123,9 +123,14 @@ const ChatActionButton = forwardRef(
         <button
           ref={ref}
           type="button"
-          className={`text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${icon} ${className ? className : ''}`}
+          className={classNames(
+            'p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 transition-colors flex items-center justify-center', // Base styles for padding and centering
+            className, // Allows override or additional classes like hover:text-red-500
+          )}
           onClick={onClick}
-        />
+        >
+          <div className={classNames(icon, 'h-4 w-4')} /> {/* Icon and its size */}
+        </button>
       </WithTooltip>
     );
   },

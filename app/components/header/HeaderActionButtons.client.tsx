@@ -422,7 +422,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
             }
           }}
         >
-          <div className="i-bolt:chat text-sm" />
+          <div className="i-bolt:chat text-lg" /> {/* Increased icon size */}
         </Button>
         <div className="w-[1px] bg-bolt-elements-borderColor" />
         <Button
@@ -435,7 +435,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
             workbenchStore.showWorkbench.set(!showWorkbench);
           }}
         >
-          <div className="i-ph:code-bold" />
+          <div className="i-ph:code-bold text-lg" /> {/* Added icon size */}
         </Button>
       </div>
     </div>

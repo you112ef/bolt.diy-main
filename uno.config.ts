@@ -21,31 +21,31 @@ const customIconCollection = iconPaths.reduce(
 
 const BASE_COLORS = {
   white: '#FFFFFF',
-  gray: {
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#E5E5E5',
-    300: '#D4D4D4',
-    400: '#A3A3A3',
-    500: '#737373',
-    600: '#525252',
-    700: '#404040',
-    800: '#262626',
-    900: '#171717',
-    950: '#0A0A0A',
+  gray: { // Slightly cooler greys
+    50: '#F7F9FA',    // Lightest background
+    100: '#F0F2F5',
+    200: '#E3E7EB',
+    300: '#D1D7DE',
+    400: '#A0AAB8',
+    500: '#717C8E',    // Mid-grey for text/icons
+    600: '#505A6C',
+    700: '#3E4756',
+    800: '#2C3340',
+    900: '#1A1F2A',
+    950: '#0D1017',    // Darkest background
   },
-  accent: {
-    50: '#F8F5FF',
-    100: '#F0EBFF',
-    200: '#E1D6FF',
-    300: '#CEBEFF',
-    400: '#B69EFF',
-    500: '#9C7DFF',
-    600: '#8A5FFF',
-    700: '#7645E8',
-    800: '#6234BB',
-    900: '#502D93',
-    950: '#2D1959',
+  accent: { // Shifted to be more vibrant, using existing darker shades as new mid-tones
+    50: '#F7F3FF',    // Lighter purple, adjusted for new scale
+    100: '#EDE7FF',
+    200: '#D9CBFF',
+    300: '#C5ABFF',
+    400: '#AD8FFF',
+    500: '#8A5FFF',    // New Accent 500 (was 600) - more vibrant
+    600: '#7645E8',    // New Accent 600 (was 700)
+    700: '#6234BB',    // New Accent 700 (was 800)
+    800: '#502D93',    // New Accent 800 (was 900)
+    900: '#3F247A',    // Adjusted darker shade
+    950: '#2A1A53',    // Adjusted darkest shade
   },
   green: {
     50: '#F0FDF4',

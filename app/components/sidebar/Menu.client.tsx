@@ -1,6 +1,7 @@
 import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useStore } from '@nanostores/react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
@@ -13,10 +14,11 @@ import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { classNames } from '~/utils/classNames';
-import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
+import { isSidebarOpen } from '~/lib/stores/sidebar'; // Import the sidebar store
+import { isMobile } from '~/utils/mobile'; // Import isMobile utility
 
-const menuVariants = {
+const menuVariantsDesktop = {
   closed: {
     opacity: 0,
     visibility: 'hidden',
@@ -30,6 +32,27 @@ const menuVariants = {
     opacity: 1,
     visibility: 'initial',
     left: 0,
+    transition: {
+      duration: 0.2,
+      ease: cubicEasingFn,
+    },
+  },
+} satisfies Variants;
+
+const menuVariantsMobile = {
+  closed: {
+    opacity: 0,
+    visibility: 'hidden',
+    x: '-100%', // Slide out to the left
+    transition: {
+      duration: 0.2,
+      ease: cubicEasingFn,
+    },
+  },
+  open: {
+    opacity: 1,
+    visibility: 'initial',
+    x: 0, // Slide in from the left
     transition: {
       duration: 0.2,
       ease: cubicEasingFn,
@@ -65,11 +88,19 @@ export const Menu = () => {
   const { duplicateCurrentChat, exportChat } = useChatHistory();
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
+  const $isSidebarOpen = useStore(isSidebarOpen); // Use the global store
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
   const { t } = useTranslation();
+  const [currentIsMobile, setCurrentIsMobile] = useState(false);
+
+  useEffect(() => {
+    setCurrentIsMobile(isMobile());
+    const handleResize = () => setCurrentIsMobile(isMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
@@ -110,12 +141,15 @@ export const Menu = () => {
   };
 
   useEffect(() => {
-    if (open) {
+    if ($isSidebarOpen) {
       loadEntries();
     }
-  }, [open]);
+  }, [$isSidebarOpen]);
 
   useEffect(() => {
+    // Desktop mouse hover logic
+    if (currentIsMobile) return;
+
     const enterThreshold = 40;
     const exitThreshold = 40;
 
@@ -125,11 +159,11 @@ export const Menu = () => {
       }
 
       if (event.pageX < enterThreshold) {
-        setOpen(true);
+        isSidebarOpen.set(true); // Update global store
       }
 
       if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
+        isSidebarOpen.set(false); // Update global store
       }
     }
 
@@ -138,7 +172,7 @@ export const Menu = () => {
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
     };
-  }, [isSettingsOpen]);
+  }, [isSettingsOpen, currentIsMobile]);
 
   const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
     event.preventDefault();
@@ -152,7 +186,7 @@ export const Menu = () => {
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
-    setOpen(false);
+    isSidebarOpen.set(false); // Close sidebar when settings open
   };
 
   const handleSettingsClose = () => {
@@ -164,18 +198,33 @@ export const Menu = () => {
       <motion.div
         ref={menuRef}
         initial="closed"
-        animate={open ? 'open' : 'closed'}
-        variants={menuVariants}
-        style={{ width: '340px' }}
+        animate={$isSidebarOpen ? 'open' : 'closed'}
+        variants={currentIsMobile ? menuVariantsMobile : menuVariantsDesktop}
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
           'bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50',
           'shadow-sm text-sm',
           isSettingsOpen ? 'z-40' : 'z-sidebar',
+          // Responsive width:
+          // On mobile (when open): full width, or almost full width.
+          // On desktop: fixed width.
+          // The `left` property in variants handles showing/hiding.
+          // We'll use CSS for width.
+          currentIsMobile ? 'w-full sm:w-[340px]' : 'w-[340px]'
         )}
       >
         <div className="h-12 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/50">
-          <div className="text-gray-900 dark:text-white font-medium"></div>
+          {/* On mobile, show a close button if sidebar is open */}
+          {currentIsMobile && $isSidebarOpen && (
+            <button
+              onClick={() => isSidebarOpen.set(false)}
+              className="i-ph:x-bold text-xl p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              aria-label={t('closeSidebar')}
+            />
+          )}
+          <div className={classNames("text-gray-900 dark:text-white font-medium", currentIsMobile && $isSidebarOpen && "flex-1 text-center")}>
+            {/* Potentially a title here if needed on mobile when sidebar takes full width */}
+          </div>
           <div className="flex items-center gap-3">
             <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
               {profile?.username || t('guestUser')}
