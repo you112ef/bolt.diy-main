@@ -136,4 +136,4 @@ const ChatActionButton = memo(forwardRef(
       </WithTooltip>
     );
   },
-)
+));
