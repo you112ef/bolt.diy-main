@@ -1,5 +1,5 @@
 import { motion, type Variants } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@nanostores/react';
 import { toast } from 'react-toastify';
@@ -100,10 +100,44 @@ export const Menu = () => {
   const [currentIsMobile, setCurrentIsMobile] = useState(
     typeof window !== 'undefined' ? isMobile() : false
   );
+  const [direction, setDirection] = useState('ltr');
+
+  useEffect(() => {
+    const currentDir = document.documentElement.dir || 'ltr';
+    setDirection(currentDir);
+
+    // Optional: Observe changes to dir attribute if needed
+    const observer = new MutationObserver(() => {
+      setDirection(document.documentElement.dir || 'ltr');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
+    return () => observer.disconnect();
+  }, []);
 
   const activeVariants = useMemo(() => {
     return currentIsMobile ? menuVariantsMobile : menuVariantsDesktop;
-  }, [currentIsMobile]);
+  }, [currentIsMobile, direction]);
+    if (currentIsMobile) {
+      return menuVariantsMobile; // Assuming mobile is okay or will be handled separately
+    }
+    if (direction === 'rtl') {
+      return { // RTL Desktop Variants
+        closed: {
+          opacity: 0,
+          visibility: 'hidden',
+          right: '-340px', // Changed from left
+          transition: { duration: 0.2, ease: cubicEasingFn },
+        },
+        open: {
+          opacity: 1,
+          visibility: 'initial',
+          right: 0, // Changed from left
+          transition: { duration: 0.2, ease: cubicEasingFn },
+        },
+      };
+    }
+    return menuVariantsDesktop; // Default LTR Desktop Variants
+  }, [currentIsMobile, direction]);
 
   useEffect(() => {
     // Ensure it's set correctly after mount and set up resize listener
@@ -187,31 +221,34 @@ export const Menu = () => {
 
   useEffect(() => {
     // Desktop mouse hover logic
-    if (currentIsMobile) return;
+    if (currentIsMobile || isSettingsOpen) return;
 
     const enterThreshold = 40;
     const exitThreshold = 40;
 
     function onMouseMove(event: MouseEvent) {
-      if (isSettingsOpen) {
-        return;
-      }
-
-      if (event.pageX < enterThreshold) {
-        isSidebarOpen.set(true); // Update global store
-      }
-
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        isSidebarOpen.set(false); // Update global store
+      if (direction === 'rtl') {
+        // RTL hover logic
+        if (window.innerWidth - event.pageX < enterThreshold) {
+          isSidebarOpen.set(true);
+        }
+        if (menuRef.current && event.clientX < menuRef.current.getBoundingClientRect().left - exitThreshold) {
+          isSidebarOpen.set(false);
+        }
+      } else {
+        // LTR hover logic (existing)
+        if (event.pageX < enterThreshold) {
+          isSidebarOpen.set(true);
+        }
+        if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
+          isSidebarOpen.set(false);
+        }
       }
     }
 
     window.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, [isSettingsOpen, currentIsMobile]);
+    return () => window.removeEventListener('mousemove', onMouseMove);
+  }, [isSettingsOpen, currentIsMobile, direction]); // Added direction to dependencies
 
   const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
     event.preventDefault();
@@ -241,7 +278,8 @@ export const Menu = () => {
         variants={activeVariants} // Use memoized variants
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
-          'bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50',
+          'bg-white dark:bg-gray-950',
+          direction === 'rtl' ? 'border-l border-gray-100 dark:border-gray-800/50' : 'border-r border-gray-100 dark:border-gray-800/50',
           'shadow-sm text-sm',
           isSettingsOpen ? 'z-40' : 'z-sidebar',
           // Responsive width:
