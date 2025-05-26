@@ -114,30 +114,31 @@ export const Menu = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Corrected activeVariants:
   const activeVariants = useMemo(() => {
-    return currentIsMobile ? menuVariantsMobile : menuVariantsDesktop;
-  }, [currentIsMobile, direction]);
     if (currentIsMobile) {
-      return menuVariantsMobile; // Assuming mobile is okay or will be handled separately
+      return menuVariantsMobile;
     }
+    // RTL Desktop Variants
     if (direction === 'rtl') {
-      return { // RTL Desktop Variants
+      return {
         closed: {
           opacity: 0,
           visibility: 'hidden',
-          right: '-340px', // Changed from left
+          right: '-340px',
           transition: { duration: 0.2, ease: cubicEasingFn },
         },
         open: {
           opacity: 1,
           visibility: 'initial',
-          right: 0, // Changed from left
+          right: '0px', // Using '0px' for consistency
           transition: { duration: 0.2, ease: cubicEasingFn },
         },
       };
     }
-    return menuVariantsDesktop; // Default LTR Desktop Variants
-  }, [currentIsMobile, direction]);
+    // Default LTR Desktop Variants
+    return menuVariantsDesktop;
+  }, [currentIsMobile, direction]); // Single, correct dependency array
 
   useEffect(() => {
     // Ensure it's set correctly after mount and set up resize listener
