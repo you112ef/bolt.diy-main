@@ -32,3 +32,30 @@ body {
   // --secondary-color: rgba(138, 43, 226, var(--gradient-opacity));
   // --accent-color: rgba(180, 170, 220, var(--gradient-opacity));
 }
+
+/* Responsive CodeMirror Font Size */
+.cm-editor {
+  font-size: 12px !important;
+}
+
+@media (min-width: 640px) { /* Corresponds to sm breakpoint */
+  .cm-editor {
+    font-size: 14px !important;
+  }
+}
+
+/* Responsive XTerm Font Size */
+/* Targeting common xterm text containers. Specificity might need adjustment. */
+.xterm-viewport, /* Often the scrollable container */
+.xterm .xterm-rows span, /* Individual characters/text segments */
+.xterm-rows > div { /* Rows themselves might also control some font aspects */
+  font-size: 12px !important;
+}
+
+@media (min-width: 640px) { /* Corresponds to sm breakpoint */
+  .xterm-viewport,
+  .xterm .xterm-rows span,
+  .xterm-rows > div {
+    font-size: 14px !important;
+  }
+}

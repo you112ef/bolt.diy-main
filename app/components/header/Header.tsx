@@ -11,26 +11,27 @@ export function Header() {
   return (
     <header
       className={classNames(
-        'flex flex-col md:flex-row rtl:md:flex-row-reverse items-center p-4 md:p-5 border-b h-auto md:h-[var(--header-height)]', // Increased mobile padding from p-3 to p-4
+        'flex flex-col md:flex-row rtl:md:flex-row-reverse items-center p-3 sm:p-4 md:p-5 border-b h-auto md:h-[var(--header-height)]', // Adjusted padding for smaller screens
         {
           'border-transparent': !chat.started,
           'border-bolt-elements-borderColor': chat.started,
         },
       )}
     >
-      {/* For RTL, the logo div will be on the right if flex-row-reverse is active */}
-      <div className="flex items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer mb-2 md:mb-0">
+      {/* For RTL, the logo div will be on the right if flex-row-reverse is active.
+          Adding rtl:flex-row-reverse to this div to ensure toggle is to the right of logo image in RTL. */}
+      <div className="flex items-center rtl:flex-row-reverse gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer mb-2 md:mb-0">
         {/* Sidebar toggle button - increased icon size and touch target */}
-        <button 
-          aria-label="Toggle sidebar" 
+        <button
+          aria-label="Toggle sidebar"
           className="p-2 -m-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" // -m-2 + p-2 = larger tappable area without affecting layout much
         >
           <div className="i-ph:sidebar-simple-duotone text-2xl" /> {/* Increased icon size from text-xl to text-2xl */}
         </button>
         <a href="/" className="text-2xl font-semibold text-accent flex items-center">
           {/* <span className="i-bolt:logo-text?mask w-[46px] inline-block" /> */}
-          <img src="/logo-light-styled.png" alt="logo" className="w-[90px] inline-block dark:hidden" />
-          <img src="/logo-dark-styled.png" alt="logo" className="w-[90px] inline-block hidden dark:block" />
+          <img src="/logo-light-styled.png" alt="logo" className="w-[70px] sm:w-[90px] inline-block dark:hidden" /> {/* Adjusted logo size */}
+          <img src="/logo-dark-styled.png" alt="logo" className="w-[70px] sm:w-[90px] inline-block hidden dark:block" /> {/* Adjusted logo size */}
         </a>
       </div>
       {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.

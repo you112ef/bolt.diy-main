@@ -63,7 +63,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
               return (
                 // For RTL, reverse the main flex direction to move avatar/action buttons to the other side of message content.
                 <div
-                  key={index}
+                  key={messageId} // Changed from key={index} to key={messageId}
                   className={classNames('flex rtl:flex-row-reverse gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
                     'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
                     'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
@@ -107,7 +107,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                             onClick={() => handleRewind(messageId)}
                             key="i-ph:arrow-u-up-left"
                             className={classNames(
-                              'i-ph:arrow-u-up-left', // This icon might need flipping if it's direction-specific
+                              'i-ph:arrow-u-up-left rtl:i-ph:arrow-u-up-right', // Swaps icon for RTL
                               'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
                             )}
                           />
@@ -117,9 +117,9 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                       <WithTooltip tooltip="Fork chat from this message">
                         <button
                           onClick={() => handleFork(messageId)}
-                          key="i-ph:git-fork" // This icon is likely symmetrical
+                          key="i-ph:git-fork" // This icon is symmetrical
                           className={classNames(
-                            'i-ph:git-fork',
+                            'i-ph:git-fork', // Symmetrical, no change needed
                             'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
                           )}
                         />

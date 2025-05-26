@@ -3,11 +3,11 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import type { JSONValue, Message } from 'ai';
-import React, { type RefCallback, useEffect, useState } from 'react';
+import React, { type RefCallback, useEffect, useState, Suspense, lazy, useRef } from 'react'; // Added Suspense, lazy, useRef
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
-import { Workbench } from '~/components/workbench/Workbench.client';
+// import { Workbench } from '~/components/workbench/Workbench.client'; // Original import
 import { classNames } from '~/utils/classNames';
 import { PROVIDER_LIST } from '~/utils/constants';
 import { Messages } from './Messages.client';
@@ -35,9 +35,12 @@ import type { ModelInfo } from '~/lib/modules/llm/types';
 import ProgressCompilation from './ProgressCompilation';
 import type { ProgressAnnotation } from '~/types/context';
 import type { ActionRunner } from '~/lib/runtime/action-runner';
-import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
+import { LOCAL_PROVIDERS, providersStore as appProvidersStore } from '~/lib/stores/settings'; // Renamed to appProvidersStore to avoid conflict
 import { SupabaseChatAlert } from '~/components/chat/SupabaseAlert';
 import { SupabaseConnection } from './SupabaseConnection';
+import { connectionStatusStore } from '~/lib/stores/connection';
+import { useStore } from '@nanostores/react';
+import { useSettings } from '~/lib/hooks/useSettings'; // To get provider settings
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -116,15 +119,77 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
+    // Lazy load Workbench
+    const Workbench = lazy(() => import('~/components/workbench/Workbench.client').then(module => ({ default: module.Workbench })));
+
+    // Lazy load Workbench
+    const Workbench = lazy(() => import('~/components/workbench/Workbench.client').then(module => ({ default: module.Workbench })));
+
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [apiKeys, setApiKeys] = useState<Record<string, string>>(getApiKeysFromCookies());
-    const [modelList, setModelList] = useState<ModelInfo[]>([]);
+    const [modelList, setModelList] = useState<ModelInfo[]>([]); // This holds all models
     const [isModelSettingsCollapsed, setIsModelSettingsCollapsed] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
     const [isModelLoading, setIsModelLoading] = useState<string | undefined>('all');
     const [progressAnnotations, setProgressAnnotations] = useState<ProgressAnnotation[]>([]);
+
+    const isOnline = useStore(connectionStatusStore);
+    const { providers: providerSettingsFromStore } = useSettings(); // Access provider settings
+    const offlineToastId = useRef<React.ReactText | null>(null); // To store the ID of the persistent offline toast
+
+    useEffect(() => {
+      if (!isOnline) {
+        // Dismiss any previous offline toast before showing a new one
+        if (offlineToastId.current) {
+          toast.dismiss(offlineToastId.current);
+        }
+
+        const ollamaProviderConfig = providerSettingsFromStore['Ollama'];
+        const currentProviderName = provider?.name;
+
+        if (currentProviderName !== 'Ollama' && ollamaProviderConfig?.settings?.enabled && ollamaProviderConfig?.settings?.baseUrl) {
+          const ollamaProviderInfo = providerList?.find(p => p.name === 'Ollama');
+          if (ollamaProviderInfo && setProvider && setModel) {
+            setProvider(ollamaProviderInfo);
+            // Find first available Ollama model from the full modelList
+            const firstOllamaModel = modelList.find(m => m.provider === 'Ollama');
+            if (firstOllamaModel) {
+              setModel(firstOllamaModel.name);
+              offlineToastId.current = toast.info("You are offline. Switched to local Ollama model: " + firstOllamaModel.name, { autoClose: false, theme: "colored", toastId: "offline-ollama-switch" });
+            } else {
+              // Attempt to set a common default if model list for Ollama isn't populated yet
+              // This might happen if dynamic models weren't fetched before going offline
+              setModel("llama3"); // Or any other sensible default you expect
+              offlineToastId.current = toast.warn("You are offline. Switched to local Ollama. Model list unavailable, set to default.", { autoClose: false, theme: "colored", toastId: "offline-ollama-default" });
+            }
+          } else {
+            offlineToastId.current = toast.error("Offline: Ollama provider not found or setters unavailable.", { autoClose: false, theme: "colored", toastId: "offline-ollama-error" });
+          }
+        } else if (currentProviderName === 'Ollama' && (!ollamaProviderConfig?.settings?.enabled || !ollamaProviderConfig?.settings?.baseUrl)) {
+            offlineToastId.current = toast.warn("You are offline and Ollama is not configured. Please configure Ollama to continue.", { autoClose: false, theme: "colored", toastId: "offline-ollama-not-configured" });
+        } else if (currentProviderName === 'Ollama') {
+            offlineToastId.current = toast.info("You are offline, using local Ollama model.", { autoClose: false, theme: "colored", toastId: "offline-ollama-active" });
+        } else {
+          offlineToastId.current = toast.warn("You are offline. Connect to the internet or configure a local Ollama provider.", { autoClose: false, theme: "colored", toastId: "offline-general" });
+        }
+      } else { // isOnline is true
+        if (offlineToastId.current) {
+          toast.dismiss(offlineToastId.current);
+          offlineToastId.current = null;
+        }
+        // Check if the previous state was offline (requires knowing previous isOnline state or checking if a toast was active)
+        // For simplicity, we show "back online" if an offline toast was just dismissed.
+        // A more robust way would be to store previous online state.
+        if (document.querySelector('.Toastify__toast--warning, .Toastify__toast--info[role="status"]')) { // Heuristic: if an offline toast was visible
+            toast.success("You are back online.", { autoClose: 3000, theme: "colored" });
+        }
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOnline, provider?.name, providerSettingsFromStore, providerList, modelList, setProvider, setModel]);
+
+
     useEffect(() => {
       if (data) {
         const progressList = data.filter(
@@ -325,16 +390,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {!chatStarted && (
               // mx-auto and text-center are fine for RTL
               <div id="intro" className="mt-[16vh] max-w-chat mx-auto text-center px-4 lg:px-0">
-                <h1 className="text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
+                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in"> {/* Adjusted text size */}
                   Where ideas begin
                 </h1>
-                <p className="text-md lg:text-xl mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200">
+                <p className="text-sm sm:text-md lg:text-xl mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200"> {/* Adjusted text size */}
                   Bring ideas to life in seconds or get help on existing projects.
                 </p>
               </div>
             )}
             <div
-              className={classNames('pt-6 px-3 sm:px-6', { // Increased base horizontal padding from px-2 to px-3
+              className={classNames('pt-6 px-3 sm:px-6', {
                 'h-full flex flex-col': chatStarted,
               })}
               ref={scrollRef}
@@ -472,7 +537,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <textarea
                       ref={textareaRef}
                       className={classNames(
-                        'w-full pl-4 rtl:pl-16 pt-4 pr-16 rtl:pr-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+                        'w-full pl-4 rtl:pl-16 pt-4 pr-16 rtl:pr-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-xs sm:text-sm', // Adjusted text size
                         'transition-all duration-200',
                         'hover:border-bolt-elements-focus',
                       )}
@@ -559,11 +624,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       )}
                     </ClientOnly>
                     {/* justify-between will reverse the visual order of the two main child divs in RTL */}
-                    <div className="flex justify-between items-center text-sm p-4 pt-2">
+                    <div className="flex justify-between items-center p-4 pt-2"> {/* Removed text-sm from here, will apply to child */}
                       {/* This div contains left-aligned (in LTR) icons. For RTL, if icon order needs reversing, add rtl:flex-row-reverse */}
                       <div className="flex gap-1 items-center rtl:flex-row-reverse">
                         <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
-                          <div className="i-ph:paperclip text-xl"></div> {/* Icon is symmetrical */}
+                          <div className="i-ph:paperclip text-lg sm:text-xl"></div> {/* Adjusted icon size */}
                         </IconButton>
                         <IconButton
                           title="Enhance prompt"
@@ -575,9 +640,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           }}
                         >
                           {enhancingPrompt ? (
-                            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl animate-spin"></div>
+                            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-lg sm:text-xl animate-spin"></div> /* Adjusted icon size */
                           ) : (
-                            <div className="i-bolt:stars text-xl"></div>
+                            <div className="i-bolt:stars text-lg sm:text-xl"></div> /* Adjusted icon size */
                           )}
                         </IconButton>
 
@@ -600,13 +665,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           disabled={!providerList || providerList.length === 0}
                         >
                           {/* Caret icon needs to flip based on language direction AND collapsed state */}
-                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? (document.documentElement.dir === 'rtl' ? 'left' : 'right') : 'down'} text-lg`} />
-                          {isModelSettingsCollapsed ? <span className="text-sm">{model}</span> : <span />} {/* Increased model text size from text-xs to text-sm */}
+                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? (document.documentElement.dir === 'rtl' ? 'left' : 'right') : 'down'} text-lg`} /> {/* Caret icon size is fine */}
+                          {isModelSettingsCollapsed ? <span className="text-xs sm:text-sm">{model}</span> : <span />} {/* Adjusted model text size */}
                         </IconButton>
                       </div>
                       {input.length > 3 ? (
                         // This text will be right-aligned by global style in RTL. Increased font size.
-                        <div className="text-sm text-bolt-elements-textTertiary"> {/* Increased from text-xs to text-sm */}
+                        <div className="text-xs sm:text-sm text-bolt-elements-textTertiary"> {/* Adjusted text size */}
                           Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd>{' '}
                           + <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd>{' '}
                           a new line
@@ -640,11 +705,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>
             {() => (
-              <Workbench
-                actionRunner={actionRunner ?? ({} as ActionRunner)}
-                chatStarted={chatStarted}
-                isStreaming={isStreaming}
-              />
+              <Suspense fallback={<div className="flex-1 p-4 text-center text-bolt-elements-textSecondary">Loading Workbench...</div>}>
+                <Workbench
+                  actionRunner={actionRunner ?? ({} as ActionRunner)}
+                  chatStarted={chatStarted}
+                  isStreaming={isStreaming}
+                />
+              </Suspense>
             )}
           </ClientOnly>
         </div>

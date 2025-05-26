@@ -44,6 +44,7 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
         );
       },
       pre: (props) => {
+        // CodeBlock component already handles overflow-x and responsive font size via its wrapper.
         const { children, node, ...rest } = props;
 
         const [firstChild] = node?.children ?? [];
@@ -62,13 +63,23 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
 
         return <pre {...rest}>{children}</pre>;
       },
+      table: ({ node, ...props }) => (
+        <div className="overflow-x-auto">
+          <table {...props} />
+        </div>
+      ),
+      // Assuming prose handles img, p, lists, blockquotes correctly with responsive font sizes.
+      // If further adjustments are needed for p, they can be added here.
+      // p: ({node, ...props}) => <p className="text-sm sm:text-base" {...props} /> // Example if prose wasn't enough
     } satisfies Components;
   }, []);
 
   return (
     <ReactMarkdown
       allowedElements={allowedHTMLElements}
-      className={styles.MarkdownContent}
+      // Added prose classes for responsive typography and styling.
+      // styles.MarkdownContent might need to be adjusted if it conflicts with prose.
+      className={`${styles.MarkdownContent} prose prose-sm sm:prose-base dark:prose-invert max-w-full`}
       components={components}
       remarkPlugins={remarkPlugins(limitedMarkdown)}
       rehypePlugins={rehypePlugins(html)}

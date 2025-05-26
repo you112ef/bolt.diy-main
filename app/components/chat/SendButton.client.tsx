@@ -32,8 +32,8 @@ export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonP
           }}
         >
           {/* Increased icon size from text-lg to text-xl */}
-          <div className="text-xl"> 
-            {!isStreaming ? <div className="i-ph:arrow-right"></div> : <div className="i-ph:stop-circle-bold"></div>}
+          <div className="text-xl">
+            {!isStreaming ? <div className="i-ph:arrow-right rtl:i-ph:arrow-left"></div> : <div className="i-ph:stop-circle-bold"></div>}
           </div>
         </motion.button>
       ) : null}

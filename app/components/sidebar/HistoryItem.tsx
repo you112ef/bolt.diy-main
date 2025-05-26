@@ -4,7 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { type ChatHistoryItem } from '~/lib/persistence';
 import WithTooltip from '~/components/ui/Tooltip';
 import { useEditChatDescription } from '~/lib/hooks';
-import { forwardRef, type ForwardedRef } from 'react';
+import { forwardRef, type ForwardedRef, memo } from 'react'; // Import memo
 
 interface HistoryItemProps {
   item: ChatHistoryItem;
@@ -13,7 +13,7 @@ interface HistoryItemProps {
   exportChat: (id?: string) => void;
 }
 
-export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) {
+export const HistoryItem = memo(({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) => { // Wrap with memo
   const { id: urlId } = useParams();
   const isActiveChat = urlId === item.urlId;
 
@@ -109,7 +109,7 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
       )}
     </div>
   );
-}
+}); // Close memo
 
 const ChatActionButton = forwardRef(
   (

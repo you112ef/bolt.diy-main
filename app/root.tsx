@@ -68,18 +68,55 @@ export const Head = createHead(() => (
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
 
-  // Simulate language selection for RTL support
-  const currentLanguage = 'ar'; // Simulate Arabic
-
   useEffect(() => {
     // Set theme
     document.documentElement.setAttribute('data-theme', theme);
 
-    // Set language direction and lang attribute
+    // Language and direction setting
+    const userProfileString = localStorage.getItem('bolt_user_profile');
+    let currentLanguage = 'en'; // Default language
+
+    if (userProfileString) {
+      try {
+        const userProfile = JSON.parse(userProfileString);
+        if (userProfile && userProfile.language) {
+          currentLanguage = userProfile.language;
+        }
+      } catch (error) {
+        console.error('Failed to parse user profile from localStorage:', error);
+        // Stick to default 'en' if parsing fails
+      }
+    }
+
     const direction = currentLanguage === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.setAttribute('dir', direction);
     document.documentElement.setAttribute('lang', currentLanguage);
-  }, [theme, currentLanguage]);
+
+    // Add event listener for storage changes to react to language updates from other tabs/windows
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'bolt_user_profile' && event.newValue) {
+        try {
+          const updatedProfile = JSON.parse(event.newValue);
+          if (updatedProfile && updatedProfile.language) {
+            const newLang = updatedProfile.language;
+            const newDirection = newLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.setAttribute('dir', newDirection);
+            document.documentElement.setAttribute('lang', newLang);
+            // You might need to force a re-render or update a nanostore if components depend on this
+          }
+        } catch (error) {
+          console.error('Failed to parse updated user profile from storage event:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [theme]); // Rerun when theme changes, language changes are handled by storage event
 
   return (
     <>

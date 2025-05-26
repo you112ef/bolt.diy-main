@@ -53,16 +53,26 @@ export const CodeBlock = memo(
         <div
           className={classNames(
             styles.CopyButtonContainer,
-            'bg-transparant absolute top-[10px] right-[10px] rounded-md z-10 text-lg flex items-center justify-center opacity-0 group-hover:opacity-100',
+            'bg-transparant absolute top-[10px] right-[10px] rtl:right-auto rtl:left-[10px] rounded-md z-10 text-lg flex items-center justify-center opacity-0 group-hover:opacity-100',
             {
-              'rounded-l-0 opacity-100': copied,
+              // LTR: when copied, left corners of container become sharp.
+              // RTL: when copied, right corners of container become sharp.
+              'rounded-l-none': copied && document.documentElement.dir !== 'rtl', // LTR copied
+              'rtl:rounded-r-none': copied && document.documentElement.dir === 'rtl', // RTL copied
+              'opacity-100': copied, // Always show if copied
             },
           )}
         >
           {!disableCopy && (
             <button
               className={classNames(
-                'flex items-center bg-accent-500 p-[6px] justify-center before:bg-white before:rounded-l-md before:text-gray-500 before:border-r before:border-gray-300 rounded-md transition-theme',
+                'flex items-center bg-accent-500 p-[6px] justify-center rounded-md transition-theme',
+                // Before pseudo-element for "Copied!" text background styling
+                // LTR: before has rounded-l-md, border-r
+                // RTL: before has rounded-r-md, border-l
+                'before:bg-white before:text-gray-500',
+                copied && document.documentElement.dir !== 'rtl' ? 'before:rounded-l-md before:border-r before:border-gray-300' : '',
+                copied && document.documentElement.dir === 'rtl' ? 'rtl:before:rounded-r-md rtl:before:border-l rtl:before:border-gray-300 rtl:before:border-r-0' : '',
                 {
                   'before:opacity-0': !copied,
                   'before:opacity-100': copied,
@@ -75,7 +85,10 @@ export const CodeBlock = memo(
             </button>
           )}
         </div>
-        <div dangerouslySetInnerHTML={{ __html: html ?? '' }}></div>
+        {/* Wrapper div for horizontal scrolling and responsive font size */}
+        <div className="overflow-x-auto text-xs sm:text-sm">
+          <div dangerouslySetInnerHTML={{ __html: html ?? '' }}></div>
+        </div>
       </div>
     );
   },

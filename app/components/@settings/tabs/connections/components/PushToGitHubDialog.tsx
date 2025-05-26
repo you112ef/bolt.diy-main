@@ -384,7 +384,7 @@ export function PushToGitHubDialog({ isOpen, onClose, onPush }: PushToGitHubDial
                 </div>
 
                 <div className="flex items-center gap-3 mb-6 p-3 bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-3 rounded-lg">
-                  <img src={user.avatar_url} alt={user.login} className="w-10 h-10 rounded-full" />
+                  <img src={user.avatar_url} alt={user.login} className="w-10 h-10 rounded-full" loading="lazy" />
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name || user.login}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">@{user.login}</p>

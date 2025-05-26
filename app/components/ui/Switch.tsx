@@ -12,8 +12,8 @@ export const Switch = memo(({ className, onCheckedChange, checked }: SwitchProps
   return (
     <SwitchPrimitive.Root
       className={classNames(
-        // Increased size: h-7 (28px), w-12 (48px)
-        'relative h-7 w-12 cursor-pointer rounded-full bg-bolt-elements-button-primary-background',
+        // Increased size: h-8 (32px), w-14 (56px) for better tap target
+        'relative h-8 w-14 cursor-pointer rounded-full bg-bolt-elements-button-primary-background',
         'transition-colors duration-200 ease-in-out',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50',
@@ -25,14 +25,14 @@ export const Switch = memo(({ className, onCheckedChange, checked }: SwitchProps
     >
       <SwitchPrimitive.Thumb
         className={classNames(
-          // Increased thumb size: h-6 w-6 (24px)
-          'block h-6 w-6 rounded-full bg-white',
+          // Increased thumb size: h-7 w-7 (28px)
+          'block h-7 w-7 rounded-full bg-white',
           'shadow-lg shadow-black/20',
           'transition-transform duration-200 ease-in-out',
           // Adjusted translation: translate-x-1 (4px from edge)
-          'translate-x-1', 
-          // Adjusted checked translation: total width 48px, thumb 24px. Remaining space 24px. (48 - 24 - 4) = 20px. So translate-x-5 (20px)
-          'data-[state=checked]:translate-x-5',
+          'translate-x-1',
+          // Adjusted checked translation: total width 56px, thumb 28px. (56 - 28 - 4) = 24px. So translate-x-6 (24px)
+          'data-[state=checked]:translate-x-6',
           'will-change-transform',
         )}
       />

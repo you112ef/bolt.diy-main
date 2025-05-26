@@ -22,7 +22,8 @@ export const DialogButton = memo(({ type, children, onClick, disabled }: DialogB
   return (
     <button
       className={classNames(
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors',
+        // Changed py-2 to h-10 for consistent 40px height, matching Button sm size
+        'inline-flex items-center gap-2 px-4 h-10 rounded-lg text-sm transition-colors',
         type === 'primary'
           ? 'bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600'
           : type === 'secondary'
@@ -116,7 +117,9 @@ export const Dialog = memo(({ children, className, showCloseButton = true, onClo
       <RadixDialog.Content asChild>
         <motion.div
           className={classNames(
-            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-950 rounded-lg shadow-xl border border-bolt-elements-borderColor z-[9999] w-[520px]',
+            // Adjusted width for mobile: w-11/12 of screen, max-w-lg (512px) for larger.
+            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-950 rounded-lg shadow-xl border border-bolt-elements-borderColor z-[9999]',
+            'w-11/12 max-w-lg', // Responsive width
             className,
           )}
           initial="closed"
@@ -124,13 +127,14 @@ export const Dialog = memo(({ children, className, showCloseButton = true, onClo
           exit="closed"
           variants={dialogVariants}
         >
-          <div className="flex flex-col">
+          {/* Added max-h-[80vh] and overflow-y-auto for scrollable content by default */}
+          <div className="flex flex-col max-h-[80vh] overflow-y-auto">
             {children}
             {showCloseButton && (
               <RadixDialog.Close asChild onClick={onClose}>
                 <IconButton
                   icon="i-ph:x"
-                  className="absolute top-3 right-3 text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary"
+                  className="absolute top-3 right-3 text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary z-10" // Ensure close button is above potentially scrolling content
                 />
               </RadixDialog.Close>
             )}

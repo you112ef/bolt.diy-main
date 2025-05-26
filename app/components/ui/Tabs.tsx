@@ -11,7 +11,9 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={classNames(
-      'inline-flex h-10 items-center justify-center rounded-md bg-bolt-elements-background p-1 text-bolt-elements-textSecondary',
+      // Added overflow-x-auto for horizontal scrolling if tabs exceed width
+      'inline-flex h-10 items-center justify-center rounded-md bg-bolt-elements-background p-1 text-bolt-elements-textSecondary overflow-x-auto',
+      // Consider adding scrollbar styling if needed, e.g., scrollbar-thin from a plugin
       className,
     )}
     {...props}

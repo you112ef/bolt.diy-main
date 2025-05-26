@@ -34,19 +34,13 @@ const rtlMenuVariants = {
 } satisfies Variants;
 
 
-// Helper to choose variants (conceptual, actual implementation might differ based on state management for language)
+// Helper to choose variants
 const getMenuVariants = () => {
-  // Simulate checking document direction. In a real app, this would come from language context/store.
   if (typeof document !== 'undefined' && document.documentElement.dir === 'rtl') {
     return rtlMenuVariants;
   }
   return ltrMenuVariants;
 };
-
-// The mouse move useEffect for opening/closing the sidebar would also need to be updated
-// to check event.pageX against window.innerWidth for RTL, and compare clientX against menuRef.current.getBoundingClientRect().left.
-// This is a JS logic change beyond simple CSS/variant adjustment and is noted as a requirement.
-// Removed erroneous satisfies Variants block that was here.
 
 type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
 
@@ -134,114 +128,32 @@ export const Menu = () => {
         return;
       }
 
-      if (event.pageX < enterThreshold) {
-        setOpen(true);
+      const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+
+      // Open sidebar logic
+      if (isRtl) {
+        if (event.pageX > window.innerWidth - enterThreshold) {
+          setOpen(true);
+        }
+      } else {
+        if (event.pageX < enterThreshold) {
+          setOpen(true);
+        }
       }
 
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
-      }
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, [isSettingsOpen]);
-
-  const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
-    event.preventDefault();
-    setDialogContent({ type: 'delete', item });
-  };
-
-  const handleDuplicate = async (id: string) => {
-    await duplicateCurrentChat(id);
-    loadEntries(); // Reload the list after duplication
-  };
-
-  const handleSettingsClick = () => {
-    setIsSettingsOpen(true);
-    setOpen(false);
-  };
-
-  const handleSettingsClose = () => {
-    setIsSettingsOpen(false);
-  };
-
-// Lazy load ControlPanel
-const ControlPanel = React.lazy(() => 
-  import('~/components/@settings/core/ControlPanel').then(module => ({ default: module.ControlPanel }))
-);
-
-export const Menu = () => {
-  const { duplicateCurrentChat, exportChat } = useChatHistory();
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
-  const [dialogContent, setDialogContent] = useState<DialogContent>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const profile = useStore(profileStore);
-
-  const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
-    items: list,
-    searchFields: ['description'],
-  });
-
-  const loadEntries = useCallback(() => {
-    if (db) {
-      getAll(db)
-        .then((list) => list.filter((item) => item.urlId && item.description))
-        .then(setList)
-        .catch((error) => toast.error(error.message));
-    }
-  }, []);
-
-  const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItem) => {
-    event.preventDefault();
-
-    if (db) {
-      deleteById(db, item.id)
-        .then(() => {
-          loadEntries();
-
-          if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
-            window.location.pathname = '/';
+      // Close sidebar logic
+      if (menuRef.current) {
+        if (isRtl) {
+          // For RTL, close if mouse is to the left of the menu (minus threshold)
+          if (event.clientX < menuRef.current.getBoundingClientRect().left - exitThreshold) {
+            setOpen(false);
           }
-        })
-        .catch((error) => {
-          toast.error('Failed to delete conversation');
-          logger.error(error);
-        });
-    }
-  }, []);
-
-  const closeDialog = () => {
-    setDialogContent(null);
-  };
-
-  useEffect(() => {
-    if (open) {
-      loadEntries();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    const enterThreshold = 40;
-    const exitThreshold = 40;
-
-    function onMouseMove(event: MouseEvent) {
-      if (isSettingsOpen) {
-        return;
-      }
-
-      if (event.pageX < enterThreshold) {
-        setOpen(true);
-      }
-
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
+        } else {
+          // For LTR, close if mouse is to the right of the menu (plus threshold)
+          if (event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
+            setOpen(false);
+          }
+        }
       }
     }
 
@@ -270,6 +182,15 @@ export const Menu = () => {
   const handleSettingsClose = () => {
     setIsSettingsOpen(false);
   };
+
+  // Lazy load ControlPanel
+  const ControlPanel = React.lazy(() =>
+    import('~/components/@settings/core/ControlPanel').then(module => ({ default: module.ControlPanel }))
+  );
+
+  // Removed the duplicated export const Menu = () => { ... } block
+  // and associated hooks and handlers that were part of the duplication.
+  // The first instance of 'export const Menu = () => {' is the one being used.
 
   return (
     <>
@@ -312,17 +233,17 @@ export const Menu = () => {
           <div className="p-3 md:p-4 space-y-3">
             <a
               href="/"
-              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-3 py-2 md:px-4 transition-colors text-base md:text-sm"
+              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-3 py-1.5 text-sm md:px-4 md:py-2 md:text-base transition-colors" // Adjusted padding and text size
             >
-              <span className="inline-block i-lucide:message-square h-5 w-5" /> 
-              <span className="font-medium">Start new chat</span> 
+              <span className="inline-block i-lucide:message-square h-5 w-5" />
+              <span className="font-medium">Start new chat</span>
             </a>
             <div className="relative w-full">
               <div className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2">
-                <span className="i-lucide:search h-4 w-4 text-gray-400 dark:text-gray-500" /> 
+                <span className="i-lucide:search h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
-                className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 rtl:pl-3 pr-3 rtl:pr-9 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500/50 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-gray-200 dark:border-gray-800"
+                className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 rtl:pl-3 pr-3 rtl:pr-9 py-1.5 text-xs sm:py-2 sm:text-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500/50 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-gray-200 dark:border-gray-800" // Adjusted padding and text size
                 type="search"
                 placeholder="Search chats..."
                 onChange={handleSearchChange}
