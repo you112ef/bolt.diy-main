@@ -216,9 +216,11 @@ function ContextMenuItem({ onSelect, children }: { onSelect?: () => void; childr
   return (
     <ContextMenu.Item
       onSelect={onSelect}
-      className="flex items-center gap-2 px-2 py-1.5 outline-0 text-sm text-bolt-elements-textPrimary cursor-pointer ws-nowrap text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive hover:bg-bolt-elements-item-backgroundActive rounded-md"
+      // Increased py-1.5 to py-2 for better touch height. Icons inside children should be sized appropriately e.g. text-lg.
+      className="flex items-center gap-2 px-2 py-2 outline-0 text-sm text-bolt-elements-textPrimary cursor-pointer ws-nowrap text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive hover:bg-bolt-elements-item-backgroundActive rounded-md"
     >
-      <span className="size-4 shrink-0"></span>
+      {/* Ensure icon placeholder can accommodate larger icons if needed, or size icons directly in children */}
+      <span className="size-5 shrink-0"></span> 
       <span>{children}</span>
     </ContextMenu.Item>
   );
@@ -256,14 +258,16 @@ function InlineInput({ depth, placeholder, initialValue = '', onSubmit, onCancel
 
   return (
     <div
-      className="flex items-center w-full px-2 bg-bolt-elements-background-depth-4 border border-bolt-elements-item-contentAccent py-0.5 text-bolt-elements-textPrimary"
+      // Increased py-0.5 to py-2 for better touch height.
+      className="flex items-center w-full px-2 bg-bolt-elements-background-depth-4 border border-bolt-elements-item-contentAccent py-2 text-bolt-elements-textPrimary"
       style={{ paddingLeft: `${6 + depth * NODE_PADDING_LEFT}px` }}
     >
-      <div className="scale-120 shrink-0 i-ph:file-plus text-bolt-elements-textTertiary" />
+      {/* Ensure icon is adequately sized, e.g., text-lg or text-xl */}
+      <div className="scale-120 shrink-0 i-ph:file-plus text-lg text-bolt-elements-textTertiary" />
       <input
         ref={inputRef}
         type="text"
-        className="ml-2 flex-1 bg-transparent border-none outline-none py-0.5 text-sm text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary min-w-0"
+        className="ml-2 flex-1 bg-transparent border-none outline-none py-1 text-sm text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary min-w-0" // Increased py-0.5 to py-1 for input text line height
         placeholder={placeholder}
         onKeyDown={handleKeyDown}
         onBlur={() => {
@@ -426,13 +430,13 @@ function FileContextMenu({
             <ContextMenu.Group className="p-1 border-b-px border-solid border-bolt-elements-borderColor">
               <ContextMenuItem onSelect={() => setIsCreatingFile(true)}>
                 <div className="flex items-center gap-2">
-                  <div className="i-ph:file-plus" />
+                  <div className="i-ph:file-plus text-lg" /> {/* Added text-lg to icons */}
                   New File
                 </div>
               </ContextMenuItem>
               <ContextMenuItem onSelect={() => setIsCreatingFolder(true)}>
                 <div className="flex items-center gap-2">
-                  <div className="i-ph:folder-plus" />
+                  <div className="i-ph:folder-plus text-lg" /> {/* Added text-lg to icons */}
                   New Folder
                 </div>
               </ContextMenuItem>
@@ -445,7 +449,7 @@ function FileContextMenu({
             <ContextMenu.Group className="p-1 border-t-px border-solid border-bolt-elements-borderColor">
               <ContextMenuItem onSelect={handleDelete}>
                 <div className="flex items-center gap-2 text-red-500">
-                  <div className="i-ph:trash" />
+                  <div className="i-ph:trash text-lg" /> {/* Added text-lg to icons */}
                   Delete {isFolder ? 'Folder' : 'File'}
                 </div>
               </ContextMenuItem>
@@ -577,12 +581,15 @@ function File({
           <div className="flex-1 truncate pr-2">{name}</div>
           <div className="flex items-center gap-1">
             {showStats && (
-              <div className="flex items-center gap-1 text-xs">
+              // Kept text-xs for diff stats as they are secondary info, but ensured no further scaling.
+              // If still too small, text-sm would be the next step.
+              <div className="flex items-center gap-1 text-xs"> 
                 {additions > 0 && <span className="text-green-500">+{additions}</span>}
                 {deletions > 0 && <span className="text-red-500">-{deletions}</span>}
               </div>
             )}
-            {unsavedChanges && <span className="i-ph:circle-fill scale-68 shrink-0 text-orange-500" />}
+            {/* Increased size of unsaved changes dot */}
+            {unsavedChanges && <span className="i-ph:circle-fill text-[10px] shrink-0 text-orange-500" />} {/* Using specific text size for dot, scale-75 or text-xs could also work */}
           </div>
         </div>
       </NodeButton>
@@ -602,14 +609,15 @@ function NodeButton({ depth, iconClasses, onClick, className, children }: Button
   return (
     <button
       className={classNames(
-        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-0.5',
+        'flex items-center gap-1.5 w-full pr-2 border-2 border-transparent text-faded py-[10px]', // Increased py-0.5 to py-[10px] (custom value for 10px padding)
         className,
       )}
       style={{ paddingLeft: `${6 + depth * NODE_PADDING_LEFT}px` }}
       onClick={() => onClick?.()}
     >
-      <div className={classNames('scale-120 shrink-0', iconClasses)}></div>
-      <div className="truncate w-full text-left">{children}</div>
+      {/* Ensure icons passed via iconClasses are adequately sized, e.g., text-lg or text-xl */}
+      <div className={classNames('shrink-0 text-lg', iconClasses)}></div> {/* Removed scale-120, set base size like text-lg */}
+      <div className="truncate w-full text-left rtl:text-right">{children}</div> {/* Added rtl:text-right */}
     </button>
   );
 }

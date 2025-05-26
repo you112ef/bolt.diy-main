@@ -68,12 +68,25 @@ export const Head = createHead(() => (
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
 
+  // Simulate language selection for RTL support
+  const currentLanguage = 'ar'; // Simulate Arabic
+
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
+    // Set theme
+    document.documentElement.setAttribute('data-theme', theme);
+
+    // Set language direction and lang attribute
+    const direction = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.setAttribute('dir', direction);
+    document.documentElement.setAttribute('lang', currentLanguage);
+  }, [theme, currentLanguage]);
 
   return (
     <>
+      {/* The DndProvider should ideally be within the main app structure, 
+           but for this change, we're focusing on html attributes. 
+           If ClientOnly causes issues with setting dir/lang early enough,
+           this might need reconsideration for initial render. */}
       <ClientOnly>{() => <DndProvider backend={HTML5Backend}>{children}</DndProvider>}</ClientOnly>
       <ScrollRestoration />
       <Scripts />

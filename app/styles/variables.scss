@@ -110,14 +110,16 @@
   --bolt-elements-borderColor: theme('colors.alpha.white.10');
   --bolt-elements-borderColorActive: theme('colors.accent.500');
 
-  --bolt-elements-bg-depth-1: theme('colors.gray.950');
-  --bolt-elements-bg-depth-2: theme('colors.gray.900');
-  --bolt-elements-bg-depth-3: theme('colors.gray.800');
+  /* OLED-friendly true black for main background */
+  --bolt-elements-bg-depth-1: #000000; 
+  --bolt-elements-bg-depth-2: theme('colors.gray.900'); /* Kept as dark gray for secondary surfaces */
+  --bolt-elements-bg-depth-3: theme('colors.gray.800'); /* Kept as lighter gray for tertiary surfaces */
   --bolt-elements-bg-depth-4: theme('colors.alpha.white.5');
 
   --bolt-elements-textPrimary: theme('colors.white');
   --bolt-elements-textSecondary: theme('colors.gray.400');
-  --bolt-elements-textTertiary: theme('colors.gray.500');
+  /* Increased contrast for tertiary text */
+  --bolt-elements-textTertiary: theme('colors.gray.400'); 
 
   --bolt-elements-code-background: theme('colors.gray.800');
   --bolt-elements-code-text: theme('colors.white');

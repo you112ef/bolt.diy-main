@@ -90,18 +90,19 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                   ref={(ref) => {
                     segmentRefs.current[index] = ref;
                   }}
-                  className={classNames('flex items-center gap-1.5 cursor-pointer shrink-0', {
+                  // Increased py-1 to py-2 for better touch target height (14px text + 16px padding = 30px height)
+                  className={classNames('flex items-center gap-1.5 cursor-pointer shrink-0 py-2 px-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800', {
                     'text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary': !isActive,
                     'text-bolt-elements-textPrimary underline': isActive,
-                    'pr-4': isLast,
+                    'pr-4 rtl:pr-1.5 rtl:pl-4': isLast, // Adjusted padding for RTL, ensure consistency with px-1.5
                   })}
                   onClick={() => handleSegmentClick(index)}
                 >
-                  {isLast && <div className="i-ph:file-duotone" />}
+                  {isLast && <div className="i-ph:file-duotone text-base" />} {/* Ensure icon has a decent base size */}
                   {segment}
                 </span>
               </DropdownMenu.Trigger>
-              {index > 0 && !isLast && <span className="i-ph:caret-right inline-block mx-1" />}
+              {index > 0 && !isLast && <span className="i-ph:caret-right rtl:i-ph:caret-left inline-block mx-1 text-sm" />} {/* Flip caret in RTL, ensure size */}
               <AnimatePresence>
                 {isActive && (
                   <DropdownMenu.Portal>

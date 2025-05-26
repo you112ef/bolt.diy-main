@@ -11,6 +11,16 @@ html,
 body {
   height: 100%;
   width: 100%;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Basic RTL text alignment */
+[dir="rtl"] body {
+  text-align: right;
 }
 
 :root {

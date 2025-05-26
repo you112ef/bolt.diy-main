@@ -319,9 +319,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div ref={scrollRef} className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
+        {/* For RTL, on large screens, reverse the order of Chat and Workbench */}
+        <div ref={scrollRef} className="flex flex-col lg:flex-row rtl:lg:flex-row-reverse overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
+              // mx-auto and text-center are fine for RTL
               <div id="intro" className="mt-[16vh] max-w-chat mx-auto text-center px-4 lg:px-0">
                 <h1 className="text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
                   Where ideas begin
@@ -332,7 +334,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             )}
             <div
-              className={classNames('pt-6 px-2 sm:px-6', {
+              className={classNames('pt-6 px-3 sm:px-6', { // Increased base horizontal padding from px-2 to px-3
                 'h-full flex flex-col': chatStarted,
               })}
               ref={scrollRef}
@@ -470,7 +472,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <textarea
                       ref={textareaRef}
                       className={classNames(
-                        'w-full pl-4 pt-4 pr-16 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
+                        'w-full pl-4 rtl:pl-16 pt-4 pr-16 rtl:pr-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-sm',
                         'transition-all duration-200',
                         'hover:border-bolt-elements-focus',
                       )}
@@ -556,10 +558,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </ClientOnly>
+                    {/* justify-between will reverse the visual order of the two main child divs in RTL */}
                     <div className="flex justify-between items-center text-sm p-4 pt-2">
-                      <div className="flex gap-1 items-center">
+                      {/* This div contains left-aligned (in LTR) icons. For RTL, if icon order needs reversing, add rtl:flex-row-reverse */}
+                      <div className="flex gap-1 items-center rtl:flex-row-reverse">
                         <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
-                          <div className="i-ph:paperclip text-xl"></div>
+                          <div className="i-ph:paperclip text-xl"></div> {/* Icon is symmetrical */}
                         </IconButton>
                         <IconButton
                           title="Enhance prompt"
@@ -595,12 +599,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onClick={() => setIsModelSettingsCollapsed(!isModelSettingsCollapsed)}
                           disabled={!providerList || providerList.length === 0}
                         >
-                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? 'right' : 'down'} text-lg`} />
-                          {isModelSettingsCollapsed ? <span className="text-xs">{model}</span> : <span />}
+                          {/* Caret icon needs to flip based on language direction AND collapsed state */}
+                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? (document.documentElement.dir === 'rtl' ? 'left' : 'right') : 'down'} text-lg`} />
+                          {isModelSettingsCollapsed ? <span className="text-sm">{model}</span> : <span />} {/* Increased model text size from text-xs to text-sm */}
                         </IconButton>
                       </div>
                       {input.length > 3 ? (
-                        <div className="text-xs text-bolt-elements-textTertiary">
+                        // This text will be right-aligned by global style in RTL. Increased font size.
+                        <div className="text-sm text-bolt-elements-textTertiary"> {/* Increased from text-xs to text-sm */}
                           Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd>{' '}
                           + <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd>{' '}
                           a new line
@@ -612,6 +618,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 </div>
               </div>
             </div>
+            {/* These buttons are centered with justify-center, which is fine for RTL */}
             <div className="flex flex-col justify-center gap-5">
               {!chatStarted && (
                 <div className="flex justify-center gap-2">

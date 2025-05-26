@@ -86,7 +86,7 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
   };
 
   return (
-    <div className="flex items-center justify-between py-3 px-1">
+    <div className="flex items-center justify-between py-3 px-3"> {/* Increased px-1 to px-3 */}
       <div className="flex items-center gap-2 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-bolt-elements-textSecondary">{provider?.name} API Key:</span>
@@ -94,18 +94,18 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
             <div className="flex items-center gap-2">
               {apiKey ? (
                 <>
-                  <div className="i-ph:check-circle-fill text-green-500 w-4 h-4" />
-                  <span className="text-xs text-green-500">Set via UI</span>
+                  <div className="i-ph:check-circle-fill text-green-500 w-5 h-5" /> {/* Increased icon size */}
+                  <span className="text-sm text-green-500">Set via UI</span> {/* Increased text size */}
                 </>
               ) : isEnvKeySet ? (
                 <>
-                  <div className="i-ph:check-circle-fill text-green-500 w-4 h-4" />
-                  <span className="text-xs text-green-500">Set via environment variable</span>
+                  <div className="i-ph:check-circle-fill text-green-500 w-5 h-5" /> {/* Increased icon size */}
+                  <span className="text-sm text-green-500">Set via environment variable</span> {/* Increased text size */}
                 </>
               ) : (
                 <>
-                  <div className="i-ph:x-circle-fill text-red-500 w-4 h-4" />
-                  <span className="text-xs text-red-500">Not Set (Please set via UI or ENV_VAR)</span>
+                  <div className="i-ph:x-circle-fill text-red-500 w-5 h-5" /> {/* Increased icon size */}
+                  <span className="text-sm text-red-500">Not Set (Please set via UI or ENV_VAR)</span> {/* Increased text size */}
                 </>
               )}
             </div>
@@ -121,23 +121,25 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
               value={tempKey}
               placeholder="Enter API Key"
               onChange={(e) => setTempKey(e.target.value)}
-              className="w-[300px] px-3 py-1.5 text-sm rounded border border-bolt-elements-borderColor 
+              className="w-full sm:w-[300px] px-3 py-2 text-sm rounded border border-bolt-elements-borderColor 
                         bg-bolt-elements-prompt-background text-bolt-elements-textPrimary 
-                        focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus"
+                        focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus" // Increased py-1.5 to py-2, added w-full for mobile
             />
             <IconButton
               onClick={handleSave}
               title="Save API Key"
               className="bg-green-500/10 hover:bg-green-500/20 text-green-500"
+              iconClassName="w-5 h-5" // Ensure icon inside IconButton is larger
             >
-              <div className="i-ph:check w-4 h-4" />
+              <div className="i-ph:check" /> {/* Removed w-4 h-4, relies on iconClassName or IconButton default */}
             </IconButton>
             <IconButton
               onClick={() => setIsEditing(false)}
               title="Cancel"
               className="bg-red-500/10 hover:bg-red-500/20 text-red-500"
+              iconClassName="w-5 h-5" // Ensure icon inside IconButton is larger
             >
-              <div className="i-ph:x w-4 h-4" />
+              <div className="i-ph:x" /> {/* Removed w-4 h-4 */}
             </IconButton>
           </div>
         ) : (
@@ -147,8 +149,9 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
                 onClick={() => setIsEditing(true)}
                 title="Edit API Key"
                 className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-500"
+                iconClassName="w-5 h-5" // Ensure icon inside IconButton is larger
               >
-                <div className="i-ph:pencil-simple w-4 h-4" />
+                <div className="i-ph:pencil-simple" /> {/* Removed w-4 h-4 */}
               </IconButton>
             }
             {provider?.getApiKeyLink && !apiKey && (
@@ -156,9 +159,10 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
                 onClick={() => window.open(provider?.getApiKeyLink)}
                 title="Get API Key"
                 className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 flex items-center gap-2"
+                // Icon size for this button with text is handled by direct class on icon div below
               >
-                <span className="text-xs whitespace-nowrap">{provider?.labelForGetApiKey || 'Get API Key'}</span>
-                <div className={`${provider?.icon || 'i-ph:key'} w-4 h-4`} />
+                <span className="text-sm whitespace-nowrap">{provider?.labelForGetApiKey || 'Get API Key'}</span> {/* Increased text size */}
+                <div className={`${provider?.icon || 'i-ph:key'} w-5 h-5`} /> {/* Increased icon size */}
               </IconButton>
             )}
           </>

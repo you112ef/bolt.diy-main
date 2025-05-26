@@ -1,7 +1,14 @@
 .BaseChat {
+  display: flex; // Added for flex context
+  flex-direction: column; // Added for vertical layout
+  height: 100%; // Ensure it takes full height
+
   &[data-chat-visible='false'] {
-    --workbench-inner-width: 100%;
-    --workbench-left: 0;
+    // On smaller screens, when chat is not visible, workbench takes full width
+    @media (max-width: 768px) {
+      --workbench-inner-width: 100%;
+      --workbench-left: 0;
+    }
 
     .Chat {
       --at-apply: bolt-ease-cubic-bezier;
@@ -10,12 +17,31 @@
       will-change: transform, opacity;
       transform: translateX(-50%);
       opacity: 0;
+
+      @media (max-width: 768px) {
+        transform: translateX(-100%); // Slide out completely on mobile
+      }
     }
   }
 }
 
 .Chat {
   opacity: 1;
+  flex-grow: 1; // Allow chat to take available space
+  display: flex; // Added for flex context
+  flex-direction: column; // Added for internal layout
+  overflow-y: auto; // Allow scrolling within chat
+
+  // On smaller screens, chat takes full width if visible
+  @media (max-width: 768px) {
+    width: 100%;
+    position: fixed; // Or absolute, depending on desired behavior
+    top: var(--header-height); // Adjust if header is fixed
+    bottom: 0;
+    left: 0;
+    z-index: 10; // Ensure it's above other content if fixed
+    background-color: var(--bolt-elements-bg-depth-1); // Match app background
+  }
 }
 
 .PromptEffectContainer {

@@ -42,27 +42,36 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
           />
+          {/* Increased icon size and added padding for touch target */}
           <button
             type="submit"
-            className="i-ph:check h-4 w-4 text-gray-500 hover:text-purple-500 transition-colors"
+            aria-label="Save chat description"
+            className="i-ph:check h-5 w-5 p-1 -m-1 text-gray-500 hover:text-purple-500 transition-colors rounded-full"
             onMouseDown={handleSubmit}
           />
         </form>
       ) : (
         <a href={`/chat/${item.urlId}`} className="flex w-full relative truncate block">
           <WithTooltip tooltip={currentDescription}>
-            <span className="truncate pr-24">{currentDescription}</span>
+            {/* Adjusted pr-[120px] to account for always visible icons (approx 4 icons * (w-5 + p-1*2 for button) + gaps) */}
+            {/* Max 4 icons: export, duplicate, rename, delete. Each icon is w-5 (20px). Button has p-1 (8px total width). So ~28px per button.
+                Gap is 1.5 (6px). Total for 4 icons: 4*28 + 3*6 = 112 + 18 = 130. Plus px-2 of parent (16px).
+                Let's use pr-[140px] to be safe. Or pr-[calc(4*theme(spacing.5)+3*theme(spacing.1.5)+theme(spacing.4))] if using theme.
+                Using a fixed pixel value for now.
+            */}
+            <span className="truncate pr-[140px]">{currentDescription}</span>
           </WithTooltip>
           <div
             className={classNames(
-              'absolute right-0 top-0 bottom-0 flex items-center bg-white dark:bg-gray-950 group-hover:bg-gray-50/80 dark:group-hover:bg-gray-800/30 px-2',
+              'absolute right-0 rtl:right-auto rtl:left-0 top-0 bottom-0 flex items-center bg-white dark:bg-gray-950 group-hover:bg-gray-50/80 dark:group-hover:bg-gray-800/30 px-2',
               { 'bg-gray-50/80 dark:bg-gray-800/30': isActiveChat },
             )}
           >
-            <div className="flex items-center gap-2.5 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Made icons always visible by removing opacity-0 and group-hover:opacity-100. Increased icon size. Reduced gap. */}
+            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 transition-opacity">
               <ChatActionButton
                 toolTipContent="Export"
-                icon="i-ph:download-simple h-4 w-4"
+                icon="i-ph:download-simple h-5 w-5" // Increased icon size
                 onClick={(event) => {
                   event.preventDefault();
                   exportChat(item.id);
@@ -71,13 +80,13 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
               {onDuplicate && (
                 <ChatActionButton
                   toolTipContent="Duplicate"
-                  icon="i-ph:copy h-4 w-4"
+                  icon="i-ph:copy h-5 w-5" // Increased icon size
                   onClick={() => onDuplicate?.(item.id)}
                 />
               )}
               <ChatActionButton
                 toolTipContent="Rename"
-                icon="i-ph:pencil-fill h-4 w-4"
+                icon="i-ph:pencil-fill h-5 w-5" // Increased icon size
                 onClick={(event) => {
                   event.preventDefault();
                   toggleEditMode();
@@ -86,7 +95,7 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat }: History
               <Dialog.Trigger asChild>
                 <ChatActionButton
                   toolTipContent="Delete"
-                  icon="i-ph:trash h-4 w-4"
+                  icon="i-ph:trash h-5 w-5" // Increased icon size
                   className="hover:text-red-500"
                   onClick={(event) => {
                     event.preventDefault();
@@ -120,10 +129,11 @@ const ChatActionButton = forwardRef(
   ) => {
     return (
       <WithTooltip tooltip={toolTipContent} position="bottom" sideOffset={4}>
+        {/* Increased p-1 to p-2 for better touch target area (20px icon + 16px padding = 36px) */}
         <button
           ref={ref}
           type="button"
-          className={`text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${icon} ${className ? className : ''}`}
+          className={`p-2 rounded-full text-gray-400 dark:text-gray-500 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${icon} ${className ? className : ''}`}
           onClick={onClick}
         />
       </WithTooltip>

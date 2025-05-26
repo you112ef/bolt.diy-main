@@ -1,61 +1,35 @@
+// app/lib/hooks/useConnectionStatus.ts
 import { useState, useEffect } from 'react';
-import { checkConnection } from '~/lib/api/connection';
 
-const ACKNOWLEDGED_CONNECTION_ISSUE_KEY = 'bolt_acknowledged_connection_issue';
-
-type ConnectionIssueType = 'disconnected' | 'high-latency' | null;
-
-const getAcknowledgedIssue = (): string | null => {
-  try {
-    return localStorage.getItem(ACKNOWLEDGED_CONNECTION_ISSUE_KEY);
-  } catch {
-    return null;
-  }
-};
-
-export const useConnectionStatus = () => {
-  const [hasConnectionIssues, setHasConnectionIssues] = useState(false);
-  const [currentIssue, setCurrentIssue] = useState<ConnectionIssueType>(null);
-  const [acknowledgedIssue, setAcknowledgedIssue] = useState<string | null>(() => getAcknowledgedIssue());
-
-  const checkStatus = async () => {
-    try {
-      const status = await checkConnection();
-      const issue = !status.connected ? 'disconnected' : status.latency > 1000 ? 'high-latency' : null;
-
-      setCurrentIssue(issue);
-
-      // Only show issues if they're new or different from the acknowledged one
-      setHasConnectionIssues(issue !== null && issue !== acknowledgedIssue);
-    } catch (error) {
-      console.error('Failed to check connection:', error);
-
-      // Show connection issues if we can't even check the status
-      setCurrentIssue('disconnected');
-      setHasConnectionIssues(true);
+export function useConnectionStatus(): boolean {
+  // Initialize state with navigator.onLine, but ensure it's only accessed client-side
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof navigator !== 'undefined') {
+      return navigator.onLine;
     }
-  };
+    return true; // Default to true in SSR or non-browser environments
+  });
 
   useEffect(() => {
-    // Check immediately and then every 10 seconds
-    checkStatus();
+    // Ensure window and navigator are defined (client-side)
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return;
+    }
 
-    const interval = setInterval(checkStatus, 10 * 1000);
+    // Update state with the current navigator.onLine value when component mounts on client
+    setIsOnline(navigator.onLine);
 
-    return () => clearInterval(interval);
-  }, [acknowledgedIssue]);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-  const acknowledgeIssue = () => {
-    setAcknowledgedIssue(currentIssue);
-    setAcknowledgedIssue(currentIssue);
-    setHasConnectionIssues(false);
-  };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-  const resetAcknowledgment = () => {
-    setAcknowledgedIssue(null);
-    setAcknowledgedIssue(null);
-    checkStatus();
-  };
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
-  return { hasConnectionIssues, currentIssue, acknowledgeIssue, resetAcknowledgment };
-};
+  return isOnline;
+}

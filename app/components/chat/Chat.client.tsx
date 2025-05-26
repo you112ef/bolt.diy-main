@@ -27,6 +27,7 @@ import { logStore } from '~/lib/stores/logs';
 import { streamingState } from '~/lib/stores/streaming';
 import { filesToArtifacts } from '~/utils/fileUtils';
 import { supabaseConnection } from '~/lib/stores/supabase';
+import { connectionStatusStore } from '~/lib/stores/connection'; // Import the store
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -115,6 +116,17 @@ interface ChatProps {
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
+    const isOnline = useStore(connectionStatusStore); // Use the store
+
+    useEffect(() => {
+      // console.log('Connection Status in Chat.client.tsx:', isOnline ? 'Online' : 'Offline');
+      if (!isOnline) {
+        toast.warn("You are offline. Attempting to use local AI.", { autoClose: 5000, toastId: 'offline-status' });
+      } else {
+        toast.dismiss('offline-status'); // Dismiss any lingering offline toast
+        // toast.success("You are back online!", { autoClose: 3000, toastId: 'online-status' });
+      }
+    }, [isOnline]);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
@@ -146,6 +158,13 @@ export const ChatImpl = memo(
 
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
 
+    const chatHeaders = useMemo(() => {
+      if (!isOnline) {
+        return { 'X-Offline-Mode': 'true' };
+      }
+      return {};
+    }, [isOnline]);
+
     const {
       messages,
       isLoading,
@@ -156,11 +175,12 @@ export const ChatImpl = memo(
       append,
       setMessages,
       reload,
-      error,
+      error, // This error object from useChat might be used
       data: chatData,
       setData,
     } = useChat({
       api: '/api/chat',
+      headers: chatHeaders, // Conditionally added header
       body: {
         apiKeys,
         files,
@@ -174,18 +194,27 @@ export const ChatImpl = memo(
             anonKey: supabaseConn?.credentials?.anonKey,
           },
         },
+        // Forwarding temperature and max_tokens from Chat.client.tsx might be complex
+        // if they are not already part of its state management.
+        // For now, assuming backend's default or values set in `body` in `api.llmcall.ts` are used.
+        // If these need to be dynamic per request from client, they should be added to the `body` here.
       },
       sendExtraMessageFields: true,
-      onError: (e) => {
-        logger.error('Request failed\n\n', e, error);
+      onError: (e) // Renamed from 'error' in original code to 'e' to avoid conflict with useChat's error
+       => {
+        const errorMessage = e.message ? e.message : 'No details were returned';
+        logger.error('Request failed\n\n', e);
         logStore.logError('Chat request failed', e, {
           component: 'Chat',
           action: 'request',
-          error: e.message,
+          error: errorMessage,
         });
-        toast.error(
-          'There was an error processing your request: ' + (e.message ? e.message : 'No details were returned'),
-        );
+
+        if (!isOnline) {
+          toast.error(`Local AI error: ${errorMessage}`);
+        } else {
+          toast.error(`There was an error processing your request: ${errorMessage}`);
+        }
       },
       onFinish: (message, response) => {
         const usage = response.usage;

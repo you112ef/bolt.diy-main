@@ -1,14 +1,14 @@
 import { useStore } from '@nanostores/react';
 import { motion, type HTMLMotionProps, type Variants } from 'framer-motion';
 import { computed } from 'nanostores';
-import { memo, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo, Suspense } from 'react'; // Added React and Suspense
 import { toast } from 'react-toastify';
 import { Popover, Transition } from '@headlessui/react';
 import { diffLines, type Change } from 'diff';
 import { ActionRunner } from '~/lib/runtime/action-runner';
 import { getLanguageFromExtension } from '~/utils/getLanguageFromExtension';
 import type { FileHistory } from '~/types/actions';
-import { DiffView } from './DiffView';
+// import { DiffView } from './DiffView'; // Original import
 import {
   type OnChangeCallback as OnEditorChange,
   type OnScrollCallback as OnEditorScroll,
@@ -23,7 +23,15 @@ import { renderLogger } from '~/utils/logger';
 import { EditorPanel } from './EditorPanel';
 import { Preview } from './Preview';
 import useViewport from '~/lib/hooks';
-import { PushToGitHubDialog } from '~/components/@settings/tabs/connections/components/PushToGitHubDialog';
+// import { PushToGitHubDialog } from '~/components/@settings/tabs/connections/components/PushToGitHubDialog'; // Original import
+
+// Lazy load components
+const DiffView = React.lazy(() => 
+  import('./DiffView').then(module => ({ default: module.DiffView }))
+);
+const PushToGitHubDialog = React.lazy(() => 
+  import('~/components/@settings/tabs/connections/components/PushToGitHubDialog').then(module => ({ default: module.PushToGitHubDialog }))
+);
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -90,7 +98,8 @@ const FileModifiedDropdown = memo(
         <Popover className="relative">
           {({ open }: { open: boolean }) => (
             <>
-              <Popover.Button className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-colors text-bolt-elements-textPrimary border border-bolt-elements-borderColor">
+              {/* Increased py-1.5 to py-[10px] (10px padding) for better touch target height (14px text + 20px padding = 34px height) */}
+              <Popover.Button className="flex items-center gap-2 px-3 py-[10px] text-sm rounded-lg bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-colors text-bolt-elements-textPrimary border border-bolt-elements-borderColor">
                 <span className="font-medium">File Changes</span>
                 {hasChanges && (
                   <span className="w-5 h-5 rounded-full bg-accent-500/20 text-accent-500 text-xs flex items-center justify-center border border-accent-500/30">
@@ -107,17 +116,19 @@ const FileModifiedDropdown = memo(
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <Popover.Panel className="absolute right-0 z-20 mt-2 w-80 origin-top-right rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
+                <Popover.Panel className="absolute right-0 rtl:right-auto rtl:left-0 z-20 mt-2 w-80 origin-top-right rtl:origin-top-left rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
                   <div className="p-2">
                     <div className="relative mx-2 mb-2">
+                      {/* Search input: icon padding needs to flip */}
                       <input
                         type="text"
                         placeholder="Search files..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full pl-8 rtl:pl-3 pr-3 rtl:pr-8 py-1.5 text-sm rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       />
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2 text-bolt-elements-textTertiary">
+                      {/* Search icon position needs to flip */}
+                      <div className="absolute left-2 rtl:left-auto rtl:right-2 top-1/2 -translate-y-1/2 text-bolt-elements-textTertiary">
                         <div className="i-ph:magnifying-glass" />
                       </div>
                     </div>
@@ -132,10 +143,13 @@ const FileModifiedDropdown = memo(
                             <button
                               key={filePath}
                               onClick={() => onSelectFile(filePath)}
-                              className="w-full px-3 py-2 text-left rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors group bg-transparent"
+                              // text-left for LTR, text-right for RTL (from global or explicit)
+                              className="w-full px-3 py-2 text-left rtl:text-right rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors group bg-transparent"
                             >
-                              <div className="flex items-center gap-2">
+                              {/* For RTL, reverse the order of icon and text description */}
+                              <div className="flex items-center rtl:flex-row-reverse gap-2">
                                 <div className="shrink-0 w-5 h-5 text-bolt-elements-textTertiary">
+                                  {/* Icons are generally fine unless they imply directionality not handled by simple mirroring */}
                                   {['typescript', 'javascript', 'jsx', 'tsx'].includes(language) && (
                                     <div className="i-ph:file-js" />
                                   )}
@@ -168,8 +182,10 @@ const FileModifiedDropdown = memo(
                                   ].includes(language) && <div className="i-ph:file-text" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-2">
+                                  {/* justify-between will correctly reverse the filename and diff stats in RTL */}
+                                  <div className="flex items-center justify-between rtl:flex-row-reverse gap-2">
                                     <div className="flex flex-col min-w-0">
+                                      {/* Text will be right-aligned due to global style */}
                                       <span className="truncate text-sm font-medium text-bolt-elements-textPrimary">
                                         {filePath.split('/').pop()}
                                       </span>
@@ -221,7 +237,8 @@ const FileModifiedDropdown = memo(
 
                                       return (
                                         showStats && (
-                                          <div className="flex items-center gap-1 text-xs shrink-0">
+                                          // Order of additions/deletions span might need rtl:flex-row-reverse if visual order matters
+                                          <div className="flex items-center rtl:flex-row-reverse gap-1 text-xs shrink-0">
                                             {additions > 0 && <span className="text-green-500">+{additions}</span>}
                                             {deletions > 0 && <span className="text-red-500">-{deletions}</span>}
                                           </div>
@@ -235,6 +252,7 @@ const FileModifiedDropdown = memo(
                           );
                         })
                       ) : (
+                        // text-center is fine
                         <div className="flex flex-col items-center justify-center p-4 text-center">
                           <div className="w-12 h-12 mb-2 text-bolt-elements-textTertiary">
                             <div className="i-ph:file-dashed" />
@@ -252,6 +270,7 @@ const FileModifiedDropdown = memo(
 
                   {hasChanges && (
                     <div className="border-t border-bolt-elements-borderColor p-2">
+                      {/* Button content (icon + text) order might need rtl:flex-row-reverse if icon should be on the other side */}
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(filteredFiles.map(([filePath]) => filePath).join('\n'));
@@ -361,47 +380,67 @@ export const Workbench = memo(
         >
           <div
             className={classNames(
-              'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
+              'fixed top-[calc(var(--header-height)+1rem)] md:top-[calc(var(--header-height)+1.5rem)] bottom-4 md:bottom-6 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
+              'w-full md:w-[var(--workbench-inner-width)]', // Full width on small screens, var-width on md+
+              'mr-0 md:mr-4 rtl:md:mr-0 rtl:md:ml-4', // Adjust margin for RTL
               {
-                'w-full': isSmallViewport,
-                'left-0': showWorkbench && isSmallViewport,
-                'left-[var(--workbench-left)]': showWorkbench,
-                'left-[100%]': !showWorkbench,
+                // Handling left/right positioning for RTL when hiding/showing workbench
+                // Assuming BaseChat flex-row-reverse places Workbench on the left in RTL.
+                // So, when shown, it should be left-0.
+                // When hidden, it should effectively be to the left of the screen (e.g., right-[100%] or negative left).
+                // The original logic 'left-[100%]' hides it to the right.
+                // For RTL, we want to hide it to the left.
+                // This might also be achievable with transform: translateX(-100%) for RTL in variants if workbenchVariants were dir-aware.
+                // Given current structure, we modify the class directly.
+                ...(typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+                  ? {
+                      'left-0': showWorkbench, // Correct for RTL if workbench is on the left
+                      'right-[100%]': !showWorkbench, // Hide to the left in RTL
+                      'left-auto': !showWorkbench, // Important to unset left if right is used
+                    }
+                  : {
+                      'left-0': showWorkbench,
+                      'left-[100%]': !showWorkbench,
+                    }),
               },
             )}
           >
-            <div className="absolute inset-0 px-2 lg:px-6">
+            <div className="absolute inset-0 px-2 md:px-4 lg:px-6">
               <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
-                <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
+                <div className="flex flex-col md:flex-row rtl:md:flex-row-reverse items-center px-2 md:px-3 py-2 border-b border-bolt-elements-borderColor">
                   <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
-                  <div className="ml-auto" />
+                  <div className="ml-auto rtl:ml-0 rtl:mr-auto mt-2 md:mt-0" />
                   {selectedView === 'code' && (
-                    <div className="flex overflow-y-auto">
+                    <div className="flex flex-wrap justify-center md:justify-start rtl:md:justify-end overflow-y-auto gap-1 md:gap-0 rtl:flex-row-reverse">
                       <PanelHeaderButton
-                        className="mr-1 text-sm"
+                        className="text-xs md:text-sm"
                         onClick={() => {
                           workbenchStore.downloadZip();
                         }}
                       >
                         <div className="i-ph:code" />
-                        Download Code
+                        <span className="hidden sm:inline">Download Code</span>
+                        <span className="sm:hidden">Download</span>
                       </PanelHeaderButton>
-                      <PanelHeaderButton className="mr-1 text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
+                      <PanelHeaderButton className="text-xs md:text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
                         {isSyncing ? <div className="i-ph:spinner" /> : <div className="i-ph:cloud-arrow-down" />}
-                        {isSyncing ? 'Syncing...' : 'Sync Files'}
+                        {isSyncing ? 'Syncing...' : <span className="hidden sm:inline">Sync Files</span>}
+                        {isSyncing || <span className="sm:hidden">Sync</span>}
                       </PanelHeaderButton>
                       <PanelHeaderButton
-                        className="mr-1 text-sm"
+                        className="text-xs md:text-sm"
                         onClick={() => {
                           workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
                         }}
                       >
                         <div className="i-ph:terminal" />
-                        Toggle Terminal
+                        <span className="hidden sm:inline">Toggle Terminal</span>
+                        <span className="sm:hidden">Terminal</span>
                       </PanelHeaderButton>
-                      <PanelHeaderButton className="mr-1 text-sm" onClick={() => setIsPushDialogOpen(true)}>
+                      <PanelHeaderButton className="text-xs md:text-sm" onClick={() => setIsPushDialogOpen(true)}>
                         <div className="i-ph:git-branch" />
-                        Push to GitHub
+                        <span className="hidden sm:inline">Push to GitHub</span>
+                        <span className="sm:hidden">GitHub</span>
                       </PanelHeaderButton>
                     </div>
                   )}
@@ -410,7 +449,7 @@ export const Workbench = memo(
                   )}
                   <IconButton
                     icon="i-ph:x-circle"
-                    className="-mr-1"
+                    className="-mr-1 rtl:mr-0 rtl:-ml-1" // Adjusted class for RTL margin
                     size="xl"
                     onClick={() => {
                       workbenchStore.showWorkbench.set(false);
@@ -418,7 +457,15 @@ export const Workbench = memo(
                   />
                 </div>
                 <div className="relative flex-1 overflow-hidden">
-                  <View initial={{ x: '0%' }} animate={{ x: selectedView === 'code' ? '0%' : '-100%' }}>
+                  {/* 
+                    Simplified conceptual animation logic for RTL.
+                    A more robust solution might involve a hook or context for direction.
+                    This assumes 'ltr' as default if document is not yet available.
+                  */}
+                  <View 
+                    initial={{ x: '0%' }} 
+                    animate={{ x: selectedView === 'code' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%') }}
+                  >
                     <EditorPanel
                       editorDocument={currentDocument}
                       isStreaming={isStreaming}
@@ -434,43 +481,56 @@ export const Workbench = memo(
                     />
                   </View>
                   <View
-                    initial={{ x: '100%' }}
-                    animate={{ x: selectedView === 'diff' ? '0%' : selectedView === 'code' ? '100%' : '-100%' }}
+                    initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+                    animate={{ 
+                      x: selectedView === 'diff' ? '0%' : 
+                         selectedView === 'code' ? ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') : 
+                                                  ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%') 
+                    }}
                   >
-                    <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
+                    <Suspense fallback={<div className="p-4 text-center">Loading Diff View...</div>}>
+                      <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
+                    </Suspense>
                   </View>
-                  <View initial={{ x: '100%' }} animate={{ x: selectedView === 'preview' ? '0%' : '100%' }}>
+                  <View 
+                    initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }} 
+                    animate={{ x: selectedView === 'preview' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+                  >
                     <Preview />
                   </View>
                 </div>
               </div>
             </div>
           </div>
-          <PushToGitHubDialog
-            isOpen={isPushDialogOpen}
-            onClose={() => setIsPushDialogOpen(false)}
-            onPush={async (repoName, username, token) => {
-              try {
-                const commitMessage = prompt('Please enter a commit message:', 'Initial commit') || 'Initial commit';
-                await workbenchStore.pushToGitHub(repoName, commitMessage, username, token);
+          {isPushDialogOpen && ( // Conditionally render Suspense and Dialog
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center text-white">Loading Dialog...</div>}>
+              <PushToGitHubDialog
+                isOpen={isPushDialogOpen}
+                onClose={() => setIsPushDialogOpen(false)}
+                onPush={async (repoName, username, token) => {
+                  try {
+                    const commitMessage = prompt('Please enter a commit message:', 'Initial commit') || 'Initial commit';
+                    await workbenchStore.pushToGitHub(repoName, commitMessage, username, token);
 
-                const repoUrl = `https://github.com/${username}/${repoName}`;
+                    const repoUrl = `https://github.com/${username}/${repoName}`;
 
-                if (updateChatMestaData && !metadata?.gitUrl) {
-                  updateChatMestaData({
-                    ...(metadata || {}),
-                    gitUrl: repoUrl,
-                  });
-                }
+                    if (updateChatMestaData && !metadata?.gitUrl) {
+                      updateChatMestaData({
+                        ...(metadata || {}),
+                        gitUrl: repoUrl,
+                      });
+                    }
 
-                return repoUrl;
-              } catch (error) {
-                console.error('Error pushing to GitHub:', error);
-                toast.error('Failed to push to GitHub');
-                throw error;
-              }
-            }}
-          />
+                    return repoUrl;
+                  } catch (error) {
+                    console.error('Error pushing to GitHub:', error);
+                    toast.error('Failed to push to GitHub');
+                    throw error;
+                  }
+                }}
+              />
+            </Suspense>
+          )}
         </motion.div>
       )
     );

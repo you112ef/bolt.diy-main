@@ -13,6 +13,9 @@ export async function action(args: ActionFunctionArgs) {
   return llmCallAction(args);
 }
 
+const LOCAL_LLAMA_URL = process.env.LOCAL_LLAMA_URL; // Read from environment
+const LOCAL_LLAMA_TIMEOUT = 10000; // 10 seconds for local server timeout
+
 async function getModelList(options: {
   apiKeys?: Record<string, string>;
   providerSettings?: Record<string, IProviderSetting>;
@@ -25,14 +28,111 @@ async function getModelList(options: {
 const logger = createScopedLogger('api.llmcall');
 
 async function llmCallAction({ context, request }: ActionFunctionArgs) {
-  const { system, message, model, provider, streamOutput } = await request.json<{
+  const requestBody = await request.json<{
     system: string;
     message: string;
     model: string;
     provider: ProviderInfo;
     streamOutput?: boolean;
+    // Add other potential parameters like temperature, max_tokens if client might send them
+    temperature?: number;
+    max_tokens?: number;
   }>();
 
+  const { system, message, model, provider, streamOutput, temperature, max_tokens } = requestBody;
+
+  const isOfflineMode = request.headers.get('X-Offline-Mode') === 'true';
+
+  if (isOfflineMode && LOCAL_LLAMA_URL) {
+    logger.info(`Offline mode: Attempting to use local LLaMA server at ${LOCAL_LLAMA_URL}`);
+    try {
+      const llamaPayload: Record<string, any> = {
+        messages: [
+          // llama.cpp OpenAI API typically prefers system message first if provided
+          ...(system ? [{ role: "system", content: system }] : []),
+          { role: "user", content: message }
+        ],
+        stream: !!streamOutput, // Ensure boolean
+      };
+
+      if (temperature !== undefined) llamaPayload.temperature = temperature;
+      // llama.cpp's /v1/chat/completions uses 'n_predict' for max_tokens,
+      // or you might need to map 'max_tokens' if your llama.cpp build supports it directly.
+      // For simplicity, we'll pass max_tokens if the server supports it by that name.
+      if (max_tokens !== undefined) llamaPayload.max_tokens = max_tokens;
+      // If llama.cpp expects n_predict, you would do:
+      // if (max_tokens !== undefined) llamaPayload.n_predict = max_tokens;
+
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), LOCAL_LLAMA_TIMEOUT);
+
+      const response = await fetch(LOCAL_LLAMA_URL + '/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add Authorization header if your llama.cpp server requires it
+          // 'Authorization': `Bearer YOUR_LOCAL_API_KEY` 
+        },
+        body: JSON.stringify(llamaPayload),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error(`Local LLaMA server request failed with status ${response.status}: ${errorBody}`);
+        throw new Response(JSON.stringify({ error: "Local LLaMA server request failed.", details: errorBody }), {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      logger.info(`Successfully received response from local LLaMA server.`);
+
+      if (streamOutput && response.body) {
+        return new Response(response.body, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/event-stream; charset=utf-8', // Common for OpenAI streaming
+          },
+        });
+      } else {
+        const jsonResponse = await response.json();
+        return new Response(JSON.stringify(jsonResponse), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+    } catch (error: any) {
+      logger.error('Error during local LLaMA fallback:', error);
+      if (error.name === 'AbortError') {
+        return new Response(JSON.stringify({ error: "Local LLaMA server request timed out." }), {
+          status: 504, // Gateway Timeout
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      // Check if error is already a Response object (thrown from !response.ok block)
+      if (error instanceof Response) {
+        return error;
+      }
+      return new Response(JSON.stringify({ error: "Local LLaMA server unavailable or an unexpected error occurred.", details: error.message }), {
+        status: 503, // Service Unavailable
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  } else if (isOfflineMode && !LOCAL_LLAMA_URL) {
+    logger.warn('Offline mode active, but LOCAL_LLAMA_URL is not configured.');
+    return new Response(JSON.stringify({ error: "Offline mode is active, but the local LLaMA server is not configured." }), {
+      status: 501, // Not Implemented (or 400 Bad Request)
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // --- Existing Online Provider Logic Starts Here ---
+  logger.info('Online mode: Proceeding with standard LLM providers.');
   const { name: providerName } = provider;
 
   // validate 'model' and 'provider' fields

@@ -216,7 +216,7 @@ export const ModelSelector = ({
             <div className="truncate">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
             <div
               className={classNames(
-                'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',
+                'i-ph:caret-down w-5 h-5 text-bolt-elements-textSecondary opacity-75', // Increased icon size from w-4 h-4
                 isModelDropdownOpen ? 'rotate-180' : undefined,
               )}
             />
@@ -225,7 +225,7 @@ export const ModelSelector = ({
 
         {isModelDropdownOpen && (
           <div
-            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2  shadow-lg"
+            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 shadow-lg" // Removed extra space before shadow-lg
             role="listbox"
             id="model-listbox"
           >
@@ -238,7 +238,7 @@ export const ModelSelector = ({
                   onChange={(e) => setModelSearchQuery(e.target.value)}
                   placeholder="Search models..."
                   className={classNames(
-                    'w-full pl-8 pr-3 py-1.5 rounded-md text-sm',
+                    'w-full pl-8 rtl:pl-3 rtl:pr-8 pr-3 py-2 rounded-md text-sm', // Increased py-1.5 to py-2, added RTL padding for icon
                     'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
                     'text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary',
                     'focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus',
@@ -248,8 +248,8 @@ export const ModelSelector = ({
                   role="searchbox"
                   aria-label="Search models"
                 />
-                <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
-                  <span className="i-ph:magnifying-glass text-bolt-elements-textTertiary" />
+                <div className="absolute left-2.5 rtl:left-auto rtl:right-2.5 top-1/2 -translate-y-1/2">
+                  <span className="i-ph:magnifying-glass text-lg text-bolt-elements-textTertiary" /> {/* Increased icon size to text-lg */}
                 </div>
               </div>
             </div>

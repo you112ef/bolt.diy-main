@@ -17,12 +17,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, imageDataList, onRemov
         <div key={file.name + file.size} className="mr-2 relative">
           {imageDataList[index] && (
             <div className="relative pt-4 pr-4">
-              <img src={imageDataList[index]} alt={file.name} className="max-h-20" />
+              <img src={imageDataList[index]} alt={file.name} className="max-h-20 rounded-md" /> {/* Added rounded-md to image */}
+              {/* Increased button size and icon size for better touch target and visibility */}
               <button
                 onClick={() => onRemove(index)}
-                className="absolute top-1 right-1 z-10 bg-black rounded-full w-5 h-5 shadow-md hover:bg-gray-900 transition-colors flex items-center justify-center"
+                aria-label={`Remove ${file.name}`}
+                className="absolute top-[-4px] right-[-4px] z-10 bg-black/70 hover:bg-black/90 rounded-full w-8 h-8 shadow-md transition-colors flex items-center justify-center" // Increased size to w-8 h-8 (32px), adjusted position for better corner tap
               >
-                <div className="i-ph:x w-3 h-3 text-gray-200" />
+                <div className="i-ph:x w-4 h-4 text-white" /> {/* Icon size w-4 h-4 (16px) is fine for a 32px button */}
               </button>
             </div>
           )}

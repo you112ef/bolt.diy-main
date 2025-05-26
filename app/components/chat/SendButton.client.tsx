@@ -15,7 +15,9 @@ export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonP
     <AnimatePresence>
       {show ? (
         <motion.button
-          className="absolute flex justify-center items-center top-[18px] right-[22px] p-1 bg-accent-500 hover:brightness-94 color-white rounded-md w-[34px] h-[34px] transition-theme disabled:opacity-50 disabled:cursor-not-allowed"
+          // Increased size to w-11 h-11 (44px), adjusted positioning, removed p-1 as size is now fixed.
+          // Added rtl:right-auto rtl:left-[10px] for RTL positioning.
+          className="absolute flex justify-center items-center top-[16px] right-[10px] rtl:right-auto rtl:left-[10px] bg-accent-500 hover:brightness-94 color-white rounded-md w-11 h-11 transition-theme disabled:opacity-50 disabled:cursor-not-allowed"
           transition={{ ease: customEasingFn, duration: 0.17 }}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -29,7 +31,8 @@ export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonP
             }
           }}
         >
-          <div className="text-lg">
+          {/* Increased icon size from text-lg to text-xl */}
+          <div className="text-xl"> 
             {!isStreaming ? <div className="i-ph:arrow-right"></div> : <div className="i-ph:stop-circle-bold"></div>}
           </div>
         </motion.button>
