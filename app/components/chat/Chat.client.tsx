@@ -200,8 +200,7 @@ export const ChatImpl = memo(
         // If these need to be dynamic per request from client, they should be added to the `body` here.
       },
       sendExtraMessageFields: true,
-      onError: (e) // Renamed from 'error' in original code to 'e' to avoid conflict with useChat's error
-       => {
+      onError: (e) => { // Renamed from 'error' in original code to 'e' to avoid conflict with useChat's error
         const errorMessage = e.message ? e.message : 'No details were returned';
         logger.error('Request failed\n\n', e);
         logStore.logError('Chat request failed', e, {
