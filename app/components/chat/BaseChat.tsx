@@ -119,11 +119,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-    // Lazy load Workbench
-    const Workbench = lazy(() => import('~/components/workbench/Workbench.client').then(module => ({ default: module.Workbench })));
-
-    // Lazy load Workbench
-    const Workbench = lazy(() => import('~/components/workbench/Workbench.client').then(module => ({ default: module.Workbench })));
+    // Lazy load Workbench - removed duplicate, changed to React.lazy
+    const Workbench = React.lazy(() => import('~/components/workbench/Workbench.client').then(module => ({ default: module.Workbench })));
 
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [apiKeys, setApiKeys] = useState<Record<string, string>>(getApiKeysFromCookies());
@@ -705,13 +702,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>
             {() => (
-              <Suspense fallback={<div className="flex-1 p-4 text-center text-bolt-elements-textSecondary">Loading Workbench...</div>}>
+              <React.Suspense fallback={<div className="flex-1 p-4 text-center text-bolt-elements-textSecondary">Loading Workbench...</div>}>
                 <Workbench
                   actionRunner={actionRunner ?? ({} as ActionRunner)}
                   chatStarted={chatStarted}
                   isStreaming={isStreaming}
                 />
-              </Suspense>
+              </React.Suspense>
             )}
           </ClientOnly>
         </div>
