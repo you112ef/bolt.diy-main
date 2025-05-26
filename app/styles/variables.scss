@@ -105,7 +105,6 @@
 }
 
 /* Color Tokens Dark Theme */
-:root,
 :root[data-theme='dark'] {
   --bolt-elements-borderColor: theme('colors.alpha.white.10');
   --bolt-elements-borderColorActive: theme('colors.accent.500');
@@ -248,4 +247,11 @@
   --bolt-elements-terminal-color-brightMagenta: var(--bolt-terminal-brightMagenta);
   --bolt-elements-terminal-color-brightCyan: var(--bolt-terminal-brightCyan);
   --bolt-elements-terminal-color-brightWhite: var(--bolt-terminal-brightWhite);
+}
+
+@media (max-width: 639px) {
+  :root {
+    --header-height: 48px;
+    --chat-min-width: 100%;
+  }
 }

@@ -13,6 +13,24 @@ body {
   width: 100%;
 }
 
+html {
+  font-size: 14px; /* Base for small screens */
+}
+
+/* Small devices (landscape phones, 640px and up) */
+@media (min-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  html {
+    font-size: 16px; /* Default for larger screens */
+  }
+}
+
 :root {
   --gradient-opacity: 0.8;
   --primary-color: rgba(158, 117, 240, var(--gradient-opacity));

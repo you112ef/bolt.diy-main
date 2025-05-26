@@ -6,6 +6,7 @@ import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect } from 'react';
+import i18n from './lib/i18n'; // Import i18n instance
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -71,6 +72,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.querySelector('html')?.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleLanguageChange = (lng: string) => {
+      document.documentElement.dir = i18n.dir(lng);
+    };
+
+    i18n.on('languageChanged', handleLanguageChange);
+    // Set initial direction
+    handleLanguageChange(i18n.language);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, []);
 
   return (
     <>

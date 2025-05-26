@@ -25,8 +25,8 @@ export const UserMessage = memo(({ content }: UserMessageProps) => {
               key={index}
               src={item.image}
               alt={`Image ${index + 1}`}
-              className="max-w-full h-auto rounded-lg"
-              style={{ maxHeight: '512px', objectFit: 'contain' }}
+              className="max-w-full h-auto rounded-lg max-h-[256px] sm:max-h-[384px] md:max-h-[512px]"
+              style={{ objectFit: 'contain' }}
             />
           ))}
         </div>

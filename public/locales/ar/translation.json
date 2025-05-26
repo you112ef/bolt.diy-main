@@ -1,0 +1,31 @@
+{
+  "greeting": "مرحباً",
+  "welcomeMessage": "أهلاً بك في التطبيق!",
+  "logoAlt": "شعار",
+  "examplePrompts": {
+    "todoApp": "أنشئ تطبيق قائمة مهام باستخدام React و Tailwind",
+    "blogAstro": "أنشئ مدونة بسيطة باستخدام Astro",
+    "cookieConsent": "أنشئ نموذج موافقة على ملفات تعريف الارتباط باستخدام Material UI",
+    "spaceInvaders": "اصنع لعبة غزاة الفضاء",
+    "ticTacToe": "اصنع لعبة Tic Tac Toe باستخدام html و css و js فقط"
+  },
+  "settingsButtonTitle": "الإعدادات",
+  "themeSwitchTitle": "تبديل السمة",
+  "guestUser": "مستخدم زائر",
+  "userAvatarAlt": "مستخدم",
+  "startNewChat": "بدء محادثة جديدة",
+  "searchChatsPlaceholder": "ابحث في المحادثات...",
+  "searchChatsAriaLabel": "ابحث في المحادثات",
+  "yourChatsTitle": "محادثاتك",
+  "noPreviousConversations": "لا توجد محادثات سابقة",
+  "noMatchesFound": "لم يتم العثور على نتائج",
+  "deleteChatTitle": "حذف المحادثة؟",
+  "deleteChatWarningPrefix": "أنت على وشك حذف \"",
+  "deleteChatWarningSuffix": "\"",
+  "deleteChatConfirmation": "هل أنت متأكد أنك تريد حذف هذه المحادثة؟",
+  "cancelButton": "إلغاء",
+  "deleteButton": "حذف",
+  "failedToDeleteConversationError": "فشل حذف المحادثة",
+  "languageSwitcherEnglish": "English",
+  "languageSwitcherArabic": "العربية"
+}
