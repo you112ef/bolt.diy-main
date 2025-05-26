@@ -46,12 +46,7 @@ const getMenuVariants = () => {
 // The mouse move useEffect for opening/closing the sidebar would also need to be updated
 // to check event.pageX against window.innerWidth for RTL, and compare clientX against menuRef.current.getBoundingClientRect().left.
 // This is a JS logic change beyond simple CSS/variant adjustment and is noted as a requirement.
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-} satisfies Variants;
+// Removed erroneous satisfies Variants block that was here.
 
 type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
 
