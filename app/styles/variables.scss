@@ -127,7 +127,7 @@
   --bolt-elements-button-primary-text: theme('colors.accent.300'); /* Lighter text for better contrast */
 
   --bolt-elements-button-secondary-background: theme('colors.alpha.white.10'); /* Slightly more visible */
-  --bolt-elements-button-secondary-backgroundHover: theme('colors.alpha.white.15'); /* Adjusted hover */
+  --bolt-elements-button-secondary-backgroundHover: theme('colors.alpha.white.20'); /* Corrected to valid theme reference */
   --bolt-elements-button-secondary-text: theme('colors.white');
 
   --bolt-elements-button-danger-background: theme('colors.alpha.red.10');
@@ -139,7 +139,7 @@
   --bolt-elements-item-contentAccent: theme('colors.accent.400'); /* Lighter accent content */
   --bolt-elements-item-contentDanger: theme('colors.red.400'); /* Lighter danger content */
   --bolt-elements-item-backgroundDefault: rgba(255, 255, 255, 0);
-  --bolt-elements-item-backgroundActive: theme('colors.alpha.white.15'); /* More distinct active background */
+  --bolt-elements-item-backgroundActive: theme('colors.alpha.white.20'); /* Corrected to valid theme reference */
   --bolt-elements-item-backgroundAccent: theme('colors.alpha.accent.20'); /* More distinct accent background */
   --bolt-elements-item-backgroundDanger: theme('colors.alpha.red.15'); /* Adjusted danger background */
 
@@ -185,7 +185,7 @@
   --bolt-elements-terminals-background: #000000; /* True black terminal background */
   --bolt-elements-terminals-buttonBackground: var(--bolt-elements-bg-depth-3);
 
-  --bolt-elements-cta-background: theme('colors.alpha.white.15'); /* Brighter CTA background */
+  --bolt-elements-cta-background: theme('colors.alpha.white.20'); /* Corrected to valid theme reference */
   --bolt-elements-cta-text: theme('colors.white');
 
   /* Terminal Colors */
