@@ -141,7 +141,7 @@
   --bolt-elements-item-backgroundDefault: rgba(255, 255, 255, 0);
   --bolt-elements-item-backgroundActive: theme('colors.alpha.white.20'); /* Corrected to valid theme reference */
   --bolt-elements-item-backgroundAccent: theme('colors.alpha.accent.20'); /* More distinct accent background */
-  --bolt-elements-item-backgroundDanger: theme('colors.alpha.red.15'); /* Adjusted danger background */
+  --bolt-elements-item-backgroundDanger: theme('colors.alpha.red.20'); /* Corrected to valid theme reference */
 
   --bolt-elements-loader-background: theme('colors.alpha.gray.10');
   --bolt-elements-loader-progress: theme('colors.accent.400'); /* Lighter loader progress */
