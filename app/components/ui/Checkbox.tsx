@@ -10,13 +10,13 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={classNames(
-      'peer h-4 w-4 shrink-0 rounded-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:focus:ring-purple-400 dark:focus:ring-offset-gray-900',
+      'peer h-5 w-5 shrink-0 rounded-sm border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:focus-visible:ring-purple-400/50 dark:focus-visible:ring-offset-gray-900 transition-std', // Added transition-std and updated focus ring
       className,
     )}
     {...props}
   >
     <CheckboxPrimitive.Indicator className="flex items-center justify-center">
-      <Check className="h-3 w-3 text-purple-500 dark:text-purple-400" />
+      <Check className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" /> {/* Increased check icon size slightly */}
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ));

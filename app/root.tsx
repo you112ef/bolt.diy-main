@@ -1,11 +1,11 @@
 import { useStore } from '@nanostores/react';
 import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useFetcher } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -85,6 +85,7 @@ import { logStore } from './lib/stores/logs';
 
 export default function App() {
   const theme = useStore(themeStore);
+  const [isRtl, setIsRtl] = useState(false);
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -93,7 +94,25 @@ export default function App() {
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
     });
-  }, []);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+  }, [isRtl]);
+
+  // Add a temporary global function for testing RTL toggle
+  useEffect(() => {
+    (window as any).toggleRtl = () => {
+      setIsRtl((prevIsRtl) => !prevIsRtl);
+    };
+    console.log(
+      'RTL dev mode: Call `toggleRtl()` in the console to switch text direction. Current RTL status:',
+      isRtl,
+    );
+    return () => {
+      delete (window as any).toggleRtl;
+    };
+  }, [isRtl]);
 
   return (
     <Layout>

@@ -193,7 +193,7 @@ export const ModelSelector = ({
       <div className="relative flex-1 lg:max-w-[70%]" onKeyDown={handleKeyDown} ref={dropdownRef}>
         <div
           className={classNames(
-            'w-full p-2 rounded-lg border border-bolt-elements-borderColor',
+            'w-full h-10 p-2 flex items-center rounded-lg border border-bolt-elements-borderColor', // Added h-10 and flex items-center
             'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
             'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
             'transition-all cursor-pointer',
@@ -238,7 +238,7 @@ export const ModelSelector = ({
                   onChange={(e) => setModelSearchQuery(e.target.value)}
                   placeholder="Search models..."
                   className={classNames(
-                    'w-full pl-8 pr-3 py-1.5 rounded-md text-sm',
+                    'w-full pl-8 pr-3 h-9 py-2.5 rounded-md text-sm', // Adjusted height and padding
                     'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
                     'text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary',
                     'focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus',
@@ -282,7 +282,7 @@ export const ModelSelector = ({
                     role="option"
                     aria-selected={model === modelOption.name}
                     className={classNames(
-                      'px-3 py-2 text-sm cursor-pointer',
+                    'px-3 py-2.5 min-h-10 flex items-center text-sm cursor-pointer', // Adjusted padding and added min-height, flex
                       'hover:bg-bolt-elements-background-depth-3',
                       'text-bolt-elements-textPrimary',
                       'outline-none',

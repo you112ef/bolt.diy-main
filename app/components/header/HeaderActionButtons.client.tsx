@@ -334,7 +334,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
             active
             disabled={isDeploying || !activePreview || isStreaming}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="px-4 hover:bg-bolt-elements-item-backgroundActive flex items-center gap-2"
+            className="px-2 sm:px-4 hover:bg-bolt-elements-item-backgroundActive flex items-center gap-2"
           >
             {isDeploying ? `Deploying to ${deployingTo}...` : 'Deploy'}
             <div

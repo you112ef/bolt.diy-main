@@ -205,14 +205,14 @@ const ActionList = memo(({ actions }: ActionListProps) => {
                   <div>
                     Create{' '}
                     <code
-                      className="bg-bolt-elements-artifacts-inlineCode-background text-bolt-elements-artifacts-inlineCode-text px-1.5 py-1 rounded-md text-bolt-elements-item-contentAccent hover:underline cursor-pointer"
+                      className="bg-bolt-elements-artifacts-inlineCode-background text-bolt-elements-artifacts-inlineCode-text px-2.5 py-3 rounded-md text-bolt-elements-item-contentAccent hover:underline cursor-pointer" // Adjusted padding
                       onClick={() => openArtifactInWorkbench(action.filePath)}
                     >
                       {action.filePath}
                     </code>
                   </div>
                 ) : type === 'shell' ? (
-                  <div className="flex items-center w-full min-h-[28px]">
+                  <div className="flex items-center w-full min-h-[40px]"> {/* Adjusted min-height */}
                     <span className="flex-1">Run command</span>
                   </div>
                 ) : type === 'start' ? (
@@ -221,7 +221,7 @@ const ActionList = memo(({ actions }: ActionListProps) => {
                       e.preventDefault();
                       workbenchStore.currentView.set('preview');
                     }}
-                    className="flex items-center w-full min-h-[28px]"
+                    className="flex items-center w-full min-h-10" // Adjusted min-height to min-h-10 (40px)
                   >
                     <span className="flex-1">Start Application</span>
                   </a>

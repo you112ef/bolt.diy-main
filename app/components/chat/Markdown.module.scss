@@ -90,8 +90,12 @@ $code-font-size: 13px;
   }
 
   pre {
-    padding: 20px 16px;
+    padding: 12px 10px; /* Default for small screens */
     border-radius: 6px;
+
+    @media (min-width: 640px) { /* sm breakpoint */
+      padding: 20px 16px;
+    }
   }
 
   pre:has(> code) {

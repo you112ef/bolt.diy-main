@@ -58,9 +58,9 @@ export const AssistantMessage = memo(({ content, annotations }: AssistantMessage
   } = filteredAnnotations.find((annotation) => annotation.type === 'usage')?.value;
 
   return (
-    <div className="overflow-hidden w-full">
+    <div className="overflow-hidden w-full text-sm sm:text-base">
       <>
-        <div className=" flex gap-2 items-center text-sm text-bolt-elements-textSecondary mb-2">
+        <div className=" flex gap-2 items-center text-xs sm:text-sm text-bolt-elements-textSecondary mb-2">
           {(codeContext || chatSummary) && (
             <Popover side="right" align="start" trigger={<div className="i-ph:info" />}>
               {chatSummary && (
