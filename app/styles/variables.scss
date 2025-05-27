@@ -107,7 +107,7 @@
 /* Color Tokens Dark Theme */
 :root,
 :root[data-theme='dark'] {
-  --bolt-elements-borderColor: theme('colors.alpha.white.15'); /* Slightly more visible borders */
+  --bolt-elements-borderColor: theme('colors.alpha.white.20'); /* Corrected to a valid theme reference */
   --bolt-elements-borderColorActive: theme('colors.accent.400'); /* Lighter active border */
 
   --bolt-elements-bg-depth-1: #000000; /* True black for base background */
