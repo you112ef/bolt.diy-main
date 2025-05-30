@@ -381,54 +381,63 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        {/* For RTL, on large screens, reverse the order of Chat and Workbench */}
-        <div ref={scrollRef} className="flex flex-col lg:flex-row rtl:lg:flex-row-reverse overflow-y-auto w-full h-full">
-          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
+        {/* For RTL, on sm+ screens, reverse the order of Chat and Workbench */}
+        <div ref={scrollRef} className="flex flex-col sm:flex-row rtl:sm:flex-row-reverse overflow-y-auto w-full h-full">
+          {/* Chat Area: Takes full width on mobile, min-width on sm+ screens */}
+          <div className={classNames(styles.Chat, 'flex flex-col flex-grow w-full sm:min-w-[var(--chat-min-width)] sm:w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
-              // mx-auto and text-center are fine for RTL
-              <div id="intro" className="mt-[16vh] max-w-chat mx-auto text-center px-4 lg:px-0">
-                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in"> {/* Adjusted text size */}
+              // mx-auto and text-center are fine for RTL. Adjusted padding for smaller screens.
+              <div id="intro" className="mt-[10vh] sm:mt-[16vh] max-w-chat mx-auto text-center px-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in"> {/* Adjusted mobile text size, removed lg specific */}
                   Where ideas begin
                 </h1>
-                <p className="text-sm sm:text-md lg:text-xl mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200"> {/* Adjusted text size */}
+                <p className="text-sm sm:text-md mb-8 text-bolt-elements-textSecondary animate-fade-in animation-delay-200"> {/* Adjusted mobile text size, removed lg specific */}
                   Bring ideas to life in seconds or get help on existing projects.
                 </p>
               </div>
             )}
+            {/* Content within Chat area */}
             <div
-              className={classNames('pt-6 px-3 sm:px-6', {
-                'h-full flex flex-col': chatStarted,
+              className={classNames('pt-3 sm:pt-6 px-3 sm:px-6 flex flex-col w-full', { // Ensure w-full for flex-col content
+                'h-full': chatStarted, // Take full height if chat started
+                'flex-grow': chatStarted, // Allow Messages to take available space
               })}
-              ref={scrollRef}
+              // scrollRef is on the parent, this inner div shouldn't also have it if parent handles scrolling
             >
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
                     <Messages
                       ref={messageRef}
-                      className="flex flex-col w-full flex-1 max-w-chat pb-6 mx-auto z-1"
+                      // max-w-chat will be applied by --chat-max-width from variables.scss which is 100% on mobile.
+                      // On sm+ it becomes 37rem. This should correctly constrain message width.
+                      className="flex flex-col w-full flex-1 pb-6 mx-auto z-1"
+                      style={{ maxWidth: 'var(--chat-max-width)' }} // Explicitly use the variable
                       messages={messages}
                       isStreaming={isStreaming}
                     />
                   ) : null;
                 }}
               </ClientOnly>
-              {supabaseAlert && (
-                <SupabaseChatAlert
-                  alert={supabaseAlert}
-                  clearAlert={() => clearSupabaseAlert?.()}
-                  postMessage={(message) => {
-                    sendMessage?.({} as any, message);
-                    clearSupabaseAlert?.();
-                  }}
-                />
-              )}
+              {/* Prompt input area and associated buttons/alerts */}
+              {/* This container needs to respect the --chat-max-width as well */}
               <div
-                className={classNames('flex flex-col gap-4 w-full max-w-chat mx-auto z-prompt mb-6', {
-                  'sticky bottom-2': chatStarted,
+                className={classNames('flex flex-col gap-4 w-full z-prompt mb-3 sm:mb-6', { // Adjusted bottom margin for mobile
+                  'sticky bottom-0 pb-1 sm:pb-0': chatStarted, // Adjusted sticky behavior for mobile
                 })}
+                style={{ maxWidth: 'var(--chat-max-width)', marginInline: 'auto' }} // Use auto for horizontal margin for centering
               >
-                <div className="bg-bolt-elements-background-depth-2">
+                {supabaseAlert && (
+                  <SupabaseChatAlert
+                    alert={supabaseAlert}
+                    clearAlert={() => clearSupabaseAlert?.()}
+                    postMessage={(message) => {
+                      sendMessage?.({} as any, message);
+                      clearSupabaseAlert?.();
+                    }}
+                  />
+                )}
+                <div className="bg-bolt-elements-background-depth-2"> {/* This class might need review if it adds unwanted bg under sticky */}
                   {actionAlert && (
                     <ChatAlert
                       alert={actionAlert}
@@ -443,13 +452,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {progressAnnotations && <ProgressCompilation data={progressAnnotations} />}
                 <div
                   className={classNames(
-                    'bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
-
-                    /*
-                     * {
-                     *   'sticky bottom-2': chatStarted,
-                     * },
-                     */
+                    'bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor relative w-full z-prompt', // Removed max-w-chat and mx-auto from here, handled by parent
                   )}
                 >
                   <svg className={classNames(styles.PromptEffectContainer)}>
@@ -495,7 +498,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           />
                           {(providerList || []).length > 0 &&
                             provider &&
-                            (!LOCAL_PROVIDERS.includes(provider.name) || 'OpenAILike') && (
+                            (!LOCAL_PROVIDERS.includes(provider.name) || 'OpenAILike') && ( // Ensure OpenAILike also shows APIKeyManager
                               <APIKeyManager
                                 provider={provider}
                                 apiKey={apiKeys[provider.name] || ''}
@@ -528,15 +531,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   </ClientOnly>
                   <div
                     className={classNames(
-                      'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg',
+                      'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg', // Ensure backdrop-blur doesn't cause perf issues on mobile
                     )}
                   >
                     <textarea
                       ref={textareaRef}
                       className={classNames(
-                        'w-full pl-4 rtl:pl-16 pt-4 pr-16 rtl:pr-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-xs sm:text-sm', // Adjusted text size
+                        'w-full pl-3 sm:pl-4 rtl:pl-12 sm:rtl:pl-16 pt-3 sm:pt-4 pr-12 sm:pr-16 rtl:pr-3 sm:rtl:pr-4 outline-none resize-none text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent text-xs sm:text-sm',
                         'transition-all duration-200',
-                        'hover:border-bolt-elements-focus',
+                        // 'hover:border-bolt-elements-focus', // This might be too subtle or covered by other focus styles
                       )}
                       onDragEnter={(e) => {
                         e.preventDefault();
@@ -573,19 +576,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           if (event.shiftKey) {
                             return;
                           }
-
                           event.preventDefault();
-
                           if (isStreaming) {
                             handleStop?.();
                             return;
                           }
-
-                          // ignore if using input method engine
                           if (event.nativeEvent.isComposing) {
                             return;
                           }
-
                           handleSendMessage?.(event);
                         }
                       }}
@@ -595,8 +593,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       }}
                       onPaste={handlePaste}
                       style={{
-                        minHeight: TEXTAREA_MIN_HEIGHT,
-                        maxHeight: TEXTAREA_MAX_HEIGHT,
+                        minHeight: TEXTAREA_MIN_HEIGHT, // 76px
+                        maxHeight: TEXTAREA_MAX_HEIGHT, // 400px or 200px
                       }}
                       placeholder="How can Bolt help you today?"
                       translate="no"
@@ -612,7 +610,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                               handleStop?.();
                               return;
                             }
-
                             if (input.length > 0 || uploadedFiles.length > 0) {
                               handleSendMessage?.(event);
                             }
@@ -620,12 +617,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </ClientOnly>
-                    {/* justify-between will reverse the visual order of the two main child divs in RTL */}
-                    <div className="flex justify-between items-center p-4 pt-2"> {/* Removed text-sm from here, will apply to child */}
-                      {/* This div contains left-aligned (in LTR) icons. For RTL, if icon order needs reversing, add rtl:flex-row-reverse */}
+                    <div className="flex justify-between items-center p-2 sm:p-4 pt-1 sm:pt-2">
                       <div className="flex gap-1 items-center rtl:flex-row-reverse">
                         <IconButton title="Upload file" className="transition-all" onClick={() => handleFileUpload()}>
-                          <div className="i-ph:paperclip text-lg sm:text-xl"></div> {/* Adjusted icon size */}
+                          <div className="i-ph:paperclip text-lg sm:text-xl"></div>
                         </IconButton>
                         <IconButton
                           title="Enhance prompt"
@@ -637,12 +632,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           }}
                         >
                           {enhancingPrompt ? (
-                            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-lg sm:text-xl animate-spin"></div> /* Adjusted icon size */
+                            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-lg sm:text-xl animate-spin"></div>
                           ) : (
-                            <div className="i-bolt:stars text-lg sm:text-xl"></div> /* Adjusted icon size */
+                            <div className="i-bolt:stars text-lg sm:text-xl"></div>
                           )}
                         </IconButton>
-
                         <SpeechRecognitionButton
                           isListening={isListening}
                           onStart={startListening}
@@ -661,16 +655,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onClick={() => setIsModelSettingsCollapsed(!isModelSettingsCollapsed)}
                           disabled={!providerList || providerList.length === 0}
                         >
-                          {/* Caret icon needs to flip based on language direction AND collapsed state */}
-                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? (document.documentElement.dir === 'rtl' ? 'left' : 'right') : 'down'} text-lg`} /> {/* Caret icon size is fine */}
-                          {isModelSettingsCollapsed ? <span className="text-xs sm:text-sm">{model}</span> : <span />} {/* Adjusted model text size */}
+                          <div className={`i-ph:caret-${isModelSettingsCollapsed ? (document.documentElement.dir === 'rtl' ? 'left' : 'right') : 'down'} text-lg`} />
+                          {isModelSettingsCollapsed ? <span className="text-xs sm:text-sm">{model}</span> : <span />}
                         </IconButton>
                       </div>
                       {input.length > 3 ? (
-                        // This text will be right-aligned by global style in RTL. Increased font size.
-                        <div className="text-xs sm:text-sm text-bolt-elements-textTertiary"> {/* Adjusted text size */}
-                          Use <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd>{' '}
-                          + <kbd className="kdb px-1.5 py-0.5 rounded bg-bolt-elements-background-depth-2">Return</kbd>{' '}
+                        <div className="text-xs sm:text-sm text-bolt-elements-textTertiary">
+                          Use <kbd className="kdb px-1 py-0.5 sm:px-1.5 rounded bg-bolt-elements-background-depth-2">Shift</kbd>{' '}
+                          + <kbd className="kdb px-1 py-0.5 sm:px-1.5 rounded bg-bolt-elements-background-depth-2">Return</kbd>{' '}
                           a new line
                         </div>
                       ) : null}
@@ -680,10 +672,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 </div>
               </div>
             </div>
-            {/* These buttons are centered with justify-center, which is fine for RTL */}
-            <div className="flex flex-col justify-center gap-5">
+            <div className="flex flex-col justify-center gap-3 sm:gap-5 p-2"> {/* Adjusted gap for mobile */}
               {!chatStarted && (
-                <div className="flex justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-2"> {/* Allow wrapping for buttons */}
                   {ImportButtons(importChat)}
                   <GitCloneButton importChat={importChat} />
                 </div>
@@ -694,20 +685,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     handleStop?.();
                     return;
                   }
-
                   handleSendMessage?.(event, messageInput);
                 })}
               {!chatStarted && <StarterTemplates />}
             </div>
           </div>
+          {/* Workbench Area: Takes remaining space on sm+ screens, full width on mobile (rendered below chat) */}
           <ClientOnly>
             {() => (
               <React.Suspense fallback={<div className="flex-1 p-4 text-center text-bolt-elements-textSecondary">Loading Workbench...</div>}>
-                <Workbench
-                  actionRunner={actionRunner ?? ({} as ActionRunner)}
-                  chatStarted={chatStarted}
-                  isStreaming={isStreaming}
-                />
+                {/* Ensure Workbench itself is responsive or hidden on very small screens if necessary */}
+                <div className="w-full h-full flex-1"> {/* Added flex-1 to allow workbench to take space */}
+                  <Workbench
+                    actionRunner={actionRunner ?? ({} as ActionRunner)}
+                    chatStarted={chatStarted}
+                    isStreaming={isStreaming}
+                  />
+                </div>
               </React.Suspense>
             )}
           </ClientOnly>

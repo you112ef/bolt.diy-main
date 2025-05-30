@@ -221,11 +221,13 @@
  */
 :root {
   --header-height: 54px;
-  --chat-max-width: 37rem;
-  --chat-min-width: 640px;
-  --workbench-width: min(calc(100% - var(--chat-min-width)), 2536px);
+
+  /* Default mobile-first layout variables */
+  --chat-max-width: 100%; /* Chat area takes full width on small screens */
+  --chat-min-width: 0px; /* No minimum width for chat on small screens */
+  --workbench-width: 100%; /* Workbench takes full width on small screens */
   --workbench-inner-width: var(--workbench-width);
-  --workbench-left: calc(100% - var(--workbench-width));
+  --workbench-left: 0px; /* Workbench starts from the left edge */
 
   /* Toasts */
   --toastify-color-progress-success: var(--bolt-elements-icon-success);
@@ -252,4 +254,15 @@
   --bolt-elements-terminal-color-brightMagenta: var(--bolt-terminal-brightMagenta);
   --bolt-elements-terminal-color-brightCyan: var(--bolt-terminal-brightCyan);
   --bolt-elements-terminal-color-brightWhite: var(--bolt-terminal-brightWhite);
+}
+
+/* Layout variables for larger screens (e.g., desktop) */
+@media (min-width: 640px) { /* Corresponds to sm breakpoint, adjust as needed */
+  :root {
+    --chat-max-width: 37rem; /* Original value */
+    --chat-min-width: 640px; /* Original value */
+    --workbench-width: min(calc(100% - var(--chat-min-width)), 2536px); /* Original value */
+    --workbench-inner-width: var(--workbench-width); /* Original value */
+    --workbench-left: calc(100% - var(--workbench-width)); /* Original value */
+  }
 }

@@ -1,19 +1,26 @@
 import { motion, type Variants } from 'framer-motion';
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react'; // Added React and Suspense
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
-// import { ControlPanel } from '~/components/@settings/core/ControlPanel'; // Original import
 import { SettingsButton } from '~/components/ui/SettingsButton';
 import { db, deleteById, getAll, chatId, type ChatHistoryItem, useChatHistory } from '~/lib/persistence';
 import { cubicEasingFn } from '~/utils/easings';
+import { isMobile } from '~/utils/mobile'; // Added import
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
+// import { ControlPanel } from '~/components/@settings/core/ControlPanel'; // Original import, ensure it's correctly placed if re-enabled
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
+
+// Define props interface
+interface MenuProps {
+  isMobileMenuOpen?: boolean;
+  toggleMobileMenu?: () => void;
+}
 
 // Note: This would ideally be dynamically generated based on document.dir,
 // but Framer Motion variants are defined at module scope.
@@ -23,23 +30,34 @@ import { profileStore } from '~/lib/stores/profile';
 // Let's simulate this by defining RTL-specific variants here for clarity,
 // though the actual dynamic application in JS is more involved.
 
-const ltrMenuVariants = {
-  closed: { opacity: 0, visibility: 'hidden', left: '-340px', transition: { duration: 0.2, ease: cubicEasingFn } },
-  open: { opacity: 1, visibility: 'initial', left: 0, transition: { duration: 0.2, ease: cubicEasingFn } },
+const ltrMenuVariantsDesktop = {
+  closed: { opacity: 0, visibility: 'hidden' as const, left: '-340px', transition: { duration: 0.2, ease: cubicEasingFn } },
+  open: { opacity: 1, visibility: 'visible' as const, left: '0px', transition: { duration: 0.2, ease: cubicEasingFn } },
 } satisfies Variants;
 
-const rtlMenuVariants = {
-  closed: { opacity: 0, visibility: 'hidden', right: '-340px', transition: { duration: 0.2, ease: cubicEasingFn } },
-  open: { opacity: 1, visibility: 'initial', right: 0, transition: { duration: 0.2, ease: cubicEasingFn } },
+const rtlMenuVariantsDesktop = {
+  closed: { opacity: 0, visibility: 'hidden' as const, right: '-340px', transition: { duration: 0.2, ease: cubicEasingFn } },
+  open: { opacity: 1, visibility: 'visible' as const, right: '0px', transition: { duration: 0.2, ease: cubicEasingFn } },
+} satisfies Variants;
+
+const ltrMenuVariantsMobile = {
+  closed: { x: '-100%', transition: { duration: 0.3, ease: cubicEasingFn } },
+  open: { x: '0%', transition: { duration: 0.3, ease: cubicEasingFn } },
+} satisfies Variants;
+
+const rtlMenuVariantsMobile = {
+  closed: { x: '100%', transition: { duration: 0.3, ease: cubicEasingFn } },
+  open: { x: '0%', transition: { duration: 0.3, ease: cubicEasingFn } },
 } satisfies Variants;
 
 
 // Helper to choose variants
-const getMenuVariants = () => {
-  if (typeof document !== 'undefined' && document.documentElement.dir === 'rtl') {
-    return rtlMenuVariants;
+const getMenuVariants = (isMobileView: boolean) => {
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+  if (isMobileView) {
+    return isRtl ? rtlMenuVariantsMobile : ltrMenuVariantsMobile;
   }
-  return ltrMenuVariants;
+  return isRtl ? rtlMenuVariantsDesktop : ltrMenuVariantsDesktop;
 };
 
 type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
@@ -66,14 +84,15 @@ function CurrentDateTime() {
   );
 }
 
-export const Menu = () => {
+export const Menu: React.FC<MenuProps> = ({ isMobileMenuOpen, toggleMobileMenu }) => {
   const { duplicateCurrentChat, exportChat } = useChatHistory();
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false); // Renamed 'open' to 'isDesktopMenuOpen'
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
+  const mobileView = isMobile(); // Determine once
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
@@ -83,7 +102,7 @@ export const Menu = () => {
   const loadEntries = useCallback(() => {
     if (db) {
       getAll(db)
-        .then((list) => list.filter((item) => item.urlId && item.description))
+        .then((listData) => listData.filter((item) => item.urlId && item.description))
         .then(setList)
         .catch((error) => toast.error(error.message));
     }
@@ -96,9 +115,7 @@ export const Menu = () => {
       deleteById(db, item.id)
         .then(() => {
           loadEntries();
-
           if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
             window.location.pathname = '/';
           }
         })
@@ -107,19 +124,22 @@ export const Menu = () => {
           logger.error(error);
         });
     }
-  }, []);
+  }, [loadEntries]);
 
   const closeDialog = () => {
     setDialogContent(null);
   };
 
   useEffect(() => {
-    if (open) {
+    // Load entries if desktop menu is open or (initially) if mobile menu is open
+    if (isDesktopMenuOpen || (mobileView && isMobileMenuOpen)) {
       loadEntries();
     }
-  }, [open]);
+  }, [isDesktopMenuOpen, isMobileMenuOpen, loadEntries, mobileView]);
 
   useEffect(() => {
+    if (mobileView) return; // Disable mouse move listener on mobile
+
     const enterThreshold = 40;
     const exitThreshold = 40;
 
@@ -130,39 +150,34 @@ export const Menu = () => {
 
       const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
 
-      // Open sidebar logic
       if (isRtl) {
         if (event.pageX > window.innerWidth - enterThreshold) {
-          setOpen(true);
+          setIsDesktopMenuOpen(true);
         }
       } else {
         if (event.pageX < enterThreshold) {
-          setOpen(true);
+          setIsDesktopMenuOpen(true);
         }
       }
 
-      // Close sidebar logic
       if (menuRef.current) {
         if (isRtl) {
-          // For RTL, close if mouse is to the left of the menu (minus threshold)
           if (event.clientX < menuRef.current.getBoundingClientRect().left - exitThreshold) {
-            setOpen(false);
+            setIsDesktopMenuOpen(false);
           }
         } else {
-          // For LTR, close if mouse is to the right of the menu (plus threshold)
           if (event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-            setOpen(false);
+            setIsDesktopMenuOpen(false);
           }
         }
       }
     }
 
     window.addEventListener('mousemove', onMouseMove);
-
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
     };
-  }, [isSettingsOpen]);
+  }, [isSettingsOpen, mobileView]);
 
   const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
     event.preventDefault();
@@ -171,44 +186,75 @@ export const Menu = () => {
 
   const handleDuplicate = async (id: string) => {
     await duplicateCurrentChat(id);
-    loadEntries(); // Reload the list after duplication
+    loadEntries();
   };
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
-    setOpen(false);
+    if (mobileView && toggleMobileMenu) {
+      toggleMobileMenu(); // Close mobile menu if open
+    } else {
+      setIsDesktopMenuOpen(false); // Close desktop menu
+    }
   };
 
   const handleSettingsClose = () => {
     setIsSettingsOpen(false);
   };
 
-  // Lazy load ControlPanel
   const ControlPanel = React.lazy(() =>
     import('~/components/@settings/core/ControlPanel').then(module => ({ default: module.ControlPanel }))
   );
 
-  // Removed the duplicated export const Menu = () => { ... } block
-  // and associated hooks and handlers that were part of the duplication.
-  // The first instance of 'export const Menu = () => {' is the one being used.
+  const currentMenuOpenState = mobileView ? isMobileMenuOpen : isDesktopMenuOpen;
+  // Do not render the menu on desktop if it's not open and not mobile view
+  // For mobile, we render it and control visibility with variants and CSS, because it's part of the header flow for now
+  if (!mobileView && !currentMenuOpenState && !isSettingsOpen) {
+     // To ensure framer-motion can animate out, we might need a different approach
+     // For now, this prevents rendering the div entirely on desktop when closed.
+     // However, framer-motion's AnimatePresence is better for exit animations.
+     // Let's keep it rendered for now and rely on visibility: 'hidden' from variants.
+  }
 
   return (
     <>
+      {mobileView && isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-menu-overlay md:hidden"
+          onClick={toggleMobileMenu}
+          aria-hidden="true"
+        />
+      )}
       <motion.div
         ref={menuRef}
         initial="closed"
-        animate={open ? 'open' : 'closed'}
-        variants={getMenuVariants()} 
-        style={{ width: 'clamp(280px, 80vw, 340px)' }} 
+        animate={currentMenuOpenState ? 'open' : 'closed'}
+        variants={getMenuVariants(mobileView)}
+        style={{ width: mobileView ? 'clamp(280px, 80vw, 340px)' : 'clamp(280px, 80vw, 340px)' }} // Width can be adjusted for mobile if needed
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
           'bg-white dark:bg-gray-950 border-r rtl:border-r-0 rtl:border-l border-gray-100 dark:border-gray-800/50',
           'shadow-sm text-sm',
-          isSettingsOpen ? 'z-40' : 'z-sidebar',
+          // Ensure mobile menu is on top of other elements, but below settings if settings are open
+          isSettingsOpen ? 'z-settings-panel' : (mobileView ? 'z-mobile-menu' : 'z-sidebar'),
+          { 'hidden': !mobileView && !currentMenuOpenState && !isSettingsOpen } // Hide on desktop if not open and settings not open
         )}
       >
         <div className="h-12 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/50">
-          <div className="text-gray-900 dark:text-white font-medium"></div>
+          {/* Close button for mobile */}
+          {mobileView && (
+            <button
+              aria-label="Close menu"
+              className="p-2 -m-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+              onClick={toggleMobileMenu}
+            >
+              <div className="i-ph:x-bold text-xl" />
+            </button>
+          )}
+          {/* Placeholder for title or other elements if needed, or adjust styling if only profile shows */}
+          <div className={classNames("text-gray-900 dark:text-white font-medium", { "flex-grow text-center": !mobileView })}>
+            {/* {!mobileView && "Menu Title"} You can add a title for desktop if needed */}
+          </div>
           <div className="flex items-center gap-3">
             <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
               {profile?.username || 'Guest User'}
@@ -233,6 +279,7 @@ export const Menu = () => {
           <div className="p-3 md:p-4 space-y-3">
             <a
               href="/"
+              onClick={mobileView && toggleMobileMenu ? toggleMobileMenu : undefined} // Close mobile menu on navigation
               className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-3 py-1.5 text-sm md:px-4 md:py-2 md:text-base transition-colors" // Adjusted padding and text size
             >
               <span className="inline-block i-lucide:message-square h-5 w-5" />
@@ -262,7 +309,7 @@ export const Menu = () => {
               {binDates(filteredList).map(({ category, items }) => (
                 <div key={category} className="mt-2 first:mt-0 space-y-1">
                   <div className="text-sm font-medium text-gray-500 dark:text-gray-400 sticky top-0 z-1 bg-white dark:bg-gray-950 px-3 md:px-4 py-1">
-                    {category} 
+                    {category}
                   </div>
                   <div className="space-y-0.5 pr-0.5 rtl:pr-0 md:pr-1 rtl:md:pr-0 rtl:pl-0.5 rtl:md:pl-1">
                     {items.map((item) => (
@@ -272,6 +319,7 @@ export const Menu = () => {
                         exportChat={exportChat}
                         onDelete={(event) => handleDeleteClick(event, item)}
                         onDuplicate={() => handleDuplicate(item.id)}
+                        onItemClick={mobileView && toggleMobileMenu ? toggleMobileMenu : undefined} // Close mobile menu on item click
                       />
                     ))}
                   </div>
@@ -280,9 +328,10 @@ export const Menu = () => {
               <Dialog onBackdrop={closeDialog} onClose={closeDialog}>
                 {dialogContent?.type === 'delete' && (
                   <>
-                    <div className="p-6 bg-white dark:bg-gray-950">
+                    {/* Adjusted padding for dialog content */}
+                    <div className="p-4 sm:p-6 bg-white dark:bg-gray-950">
                       <DialogTitle className="text-gray-900 dark:text-white">Delete Chat?</DialogTitle>
-                      <DialogDescription className="mt-2 text-gray-600 dark:text-gray-400">
+                      <DialogDescription className="mt-2 text-gray-600 dark:text-gray-400 text-sm sm:text-base"> {/* Ensure text size is responsive if needed */}
                         <p>
                           You are about to delete{' '}
                           <span className="font-medium text-gray-900 dark:text-white">
@@ -292,14 +341,17 @@ export const Menu = () => {
                         <p className="mt-2">Are you sure you want to delete this chat?</p>
                       </DialogDescription>
                     </div>
-                    <div className="flex justify-end rtl:justify-start gap-3 px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+                    {/* Adjusted padding and gap for dialog actions */}
+                    <div className="flex justify-end rtl:justify-start gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
                       <DialogButton type="secondary" onClick={closeDialog}>
                         Cancel
                       </DialogButton>
                       <DialogButton
                         type="danger"
                         onClick={(event) => {
-                          deleteItem(event, dialogContent.item);
+                          if (dialogContent) { // Ensure dialogContent is not null
+                            deleteItem(event, dialogContent.item);
+                          }
                           closeDialog();
                         }}
                       >
@@ -317,10 +369,10 @@ export const Menu = () => {
           </div>
         </div>
       </motion.div>
-      
+
       {/* Conditionally render ControlPanel with Suspense */}
       {isSettingsOpen && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center text-white">Loading Settings...</div>}>
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-settings-panel-loading flex items-center justify-center text-white">Loading Settings...</div>}>
           <ControlPanel open={isSettingsOpen} onClose={handleSettingsClose} />
         </Suspense>
       )}

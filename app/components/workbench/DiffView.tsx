@@ -313,9 +313,9 @@ const processChanges = (beforeCode: string, afterCode: string) => {
 };
 
 const lineNumberStyles =
-  'w-9 shrink-0 pl-2 py-1 text-left font-mono text-bolt-elements-textTertiary border-r border-bolt-elements-borderColor bg-bolt-elements-background-depth-1';
+  'w-9 shrink-0 pl-2 py-1 text-left font-mono text-bolt-elements-textTertiary border-r border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 text-xs sm:text-sm'; // Added responsive text size
 const lineContentStyles =
-  'px-1 py-1 font-mono whitespace-pre flex-1 group-hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary';
+  'px-1 py-1 font-mono whitespace-pre flex-1 group-hover:bg-bolt-elements-background-depth-2 text-bolt-elements-textPrimary text-xs sm:text-sm'; // Added responsive text size
 const diffPanelStyles = 'h-full overflow-auto diff-panel-content';
 
 // Updated color styles for better consistency

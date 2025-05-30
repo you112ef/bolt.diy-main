@@ -116,20 +116,22 @@ const FileModifiedDropdown = memo(
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <Popover.Panel className="absolute right-0 rtl:right-auto rtl:left-0 z-20 mt-2 w-80 origin-top-right rtl:origin-top-left rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
+                {/* Adjusted width: full width on small screens, max-w-xs, then w-80 on sm+ screens. Added px-2 for full-width scenarios. */}
+                <Popover.Panel className="absolute right-0 rtl:right-auto rtl:left-0 z-20 mt-2 w-full max-w-xs sm:w-80 origin-top-right rtl:origin-top-left rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
                   <div className="p-2">
-                    <div className="relative mx-2 mb-2">
+                    {/* Search input: icon padding needs to flip. Container mx-2 might be too much if panel is full width. */}
+                    <div className="relative sm:mx-2 mb-2">
                       {/* Search input: icon padding needs to flip */}
                       <input
                         type="text"
                         placeholder="Search files..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-8 rtl:pl-3 pr-3 rtl:pr-8 py-1.5 text-sm rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full pl-8 rtl:pl-3 pr-3 rtl:pr-8 py-1.5 text-xs sm:text-sm rounded-lg bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor focus:outline-none focus:ring-2 focus:ring-blue-500/50" // text-xs sm:text-sm
                       />
                       {/* Search icon position needs to flip */}
                       <div className="absolute left-2 rtl:left-auto rtl:right-2 top-1/2 -translate-y-1/2 text-bolt-elements-textTertiary">
-                        <div className="i-ph:magnifying-glass" />
+                        <div className="i-ph:magnifying-glass text-base sm:text-lg" /> {/* Adjusted icon size */}
                       </div>
                     </div>
 
@@ -144,11 +146,12 @@ const FileModifiedDropdown = memo(
                               key={filePath}
                               onClick={() => onSelectFile(filePath)}
                               // text-left for LTR, text-right for RTL (from global or explicit)
-                              className="w-full px-3 py-2 text-left rtl:text-right rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors group bg-transparent"
+                              // Adjusted padding and text size for items
+                              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-left rtl:text-right rounded-md hover:bg-bolt-elements-background-depth-1 transition-colors group bg-transparent"
                             >
                               {/* For RTL, reverse the order of icon and text description */}
-                              <div className="flex items-center rtl:flex-row-reverse gap-2">
-                                <div className="shrink-0 w-5 h-5 text-bolt-elements-textTertiary">
+                              <div className="flex items-center rtl:flex-row-reverse gap-1.5 sm:gap-2">
+                                <div className="shrink-0 w-4 h-4 sm:w-5 sm:h-5 text-bolt-elements-textTertiary text-base sm:text-lg"> {/* Adjusted icon container and icon size */}
                                   {/* Icons are generally fine unless they imply directionality not handled by simple mirroring */}
                                   {['typescript', 'javascript', 'jsx', 'tsx'].includes(language) && (
                                     <div className="i-ph:file-js" />
@@ -183,10 +186,10 @@ const FileModifiedDropdown = memo(
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   {/* justify-between will correctly reverse the filename and diff stats in RTL */}
-                                  <div className="flex items-center justify-between rtl:flex-row-reverse gap-2">
+                                  <div className="flex items-center justify-between rtl:flex-row-reverse gap-1 sm:gap-2">
                                     <div className="flex flex-col min-w-0">
-                                      {/* Text will be right-aligned due to global style */}
-                                      <span className="truncate text-sm font-medium text-bolt-elements-textPrimary">
+                                      {/* Text will be right-aligned due to global style. Adjusted text sizes. */}
+                                      <span className="truncate text-xs sm:text-sm font-medium text-bolt-elements-textPrimary">
                                         {filePath.split('/').pop()}
                                       </span>
                                       <span className="truncate text-xs text-bolt-elements-textTertiary">
@@ -376,130 +379,113 @@ export const Workbench = memo(
           initial="closed"
           animate={showWorkbench ? 'open' : 'closed'}
           variants={workbenchVariants}
-          className="z-workbench"
+          // Apply styling that was on the removed 'fixed' div here or to a new direct child.
+          // The motion.div will be the flex item in BaseChat.tsx.
+          // It needs to handle its own height and scrolling if necessary, or ensure its children do.
+          // BaseChat's <div class="workbench-container w-full h-full flex-1"> will give it space.
+          className={classNames(
+            "z-workbench h-full flex flex-col", // Ensure it's a flex container and takes full height
+            // Add padding/margins here if they were meant for the overall workbench container
+            // E.g., p-2 sm:p-4, but this might interfere with internal absolute positioning if not careful.
+            // The original 'fixed' div had 'mr-0 md:mr-4 rtl:md:mr-0 rtl:md:ml-4' for side margin,
+            // and 'px-2 md:px-4 lg:px-6' on an inner div.
+            // The side margin is better handled by the parent flex container in BaseChat if needed.
+            // The padding can be applied to the direct child that forms the visual panel.
+          )}
         >
-          <div
-            className={classNames(
-              'fixed top-[calc(var(--header-height)+1rem)] md:top-[calc(var(--header-height)+1.5rem)] bottom-4 md:bottom-6 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
-              'w-full md:w-[var(--workbench-inner-width)]', // Full width on small screens, var-width on md+
-              'mr-0 md:mr-4 rtl:md:mr-0 rtl:md:ml-4', // Adjust margin for RTL
-              {
-                // Handling left/right positioning for RTL when hiding/showing workbench
-                // Assuming BaseChat flex-row-reverse places Workbench on the left in RTL.
-                // So, when shown, it should be left-0.
-                // When hidden, it should effectively be to the left of the screen (e.g., right-[100%] or negative left).
-                // The original logic 'left-[100%]' hides it to the right.
-                // For RTL, we want to hide it to the left.
-                // This might also be achievable with transform: translateX(-100%) for RTL in variants if workbenchVariants were dir-aware.
-                // Given current structure, we modify the class directly.
-                ...(typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-                  ? {
-                      'left-0': showWorkbench, // Correct for RTL if workbench is on the left
-                      'right-[100%]': !showWorkbench, // Hide to the left in RTL
-                      'left-auto': !showWorkbench, // Important to unset left if right is used
-                    }
-                  : {
-                      'left-0': showWorkbench,
-                      'left-[100%]': !showWorkbench,
-                    }),
-              },
-            )}
-          >
-            <div className="absolute inset-0 px-2 md:px-4 lg:px-6">
-              <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
-                <div className="flex flex-col md:flex-row rtl:md:flex-row-reverse items-center px-2 md:px-3 py-2 border-b border-bolt-elements-borderColor">
-                  <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
-                  <div className="ml-auto rtl:ml-0 rtl:mr-auto mt-2 md:mt-0" />
-                  {selectedView === 'code' && (
-                    <div className="flex flex-wrap justify-center md:justify-start rtl:md:justify-end overflow-y-auto gap-1 md:gap-0 rtl:flex-row-reverse">
-                      <PanelHeaderButton
-                        className="text-xs md:text-sm"
-                        onClick={() => {
-                          workbenchStore.downloadZip();
-                        }}
-                      >
-                        <div className="i-ph:code" />
-                        <span className="hidden sm:inline">Download Code</span>
-                        <span className="sm:hidden">Download</span>
-                      </PanelHeaderButton>
-                      <PanelHeaderButton className="text-xs md:text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
-                        {isSyncing ? <div className="i-ph:spinner" /> : <div className="i-ph:cloud-arrow-down" />}
-                        {isSyncing ? 'Syncing...' : <span className="hidden sm:inline">Sync Files</span>}
-                        {isSyncing || <span className="sm:hidden">Sync</span>}
-                      </PanelHeaderButton>
-                      <PanelHeaderButton
-                        className="text-xs md:text-sm"
-                        onClick={() => {
-                          workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
-                        }}
-                      >
-                        <div className="i-ph:terminal" />
-                        <span className="hidden sm:inline">Toggle Terminal</span>
-                        <span className="sm:hidden">Terminal</span>
-                      </PanelHeaderButton>
-                      <PanelHeaderButton className="text-xs md:text-sm" onClick={() => setIsPushDialogOpen(true)}>
-                        <div className="i-ph:git-branch" />
-                        <span className="hidden sm:inline">Push to GitHub</span>
-                        <span className="sm:hidden">GitHub</span>
-                      </PanelHeaderButton>
-                    </div>
-                  )}
-                  {selectedView === 'diff' && (
-                    <FileModifiedDropdown fileHistory={fileHistory} onSelectFile={handleSelectFile} />
-                  )}
-                  <IconButton
-                    icon="i-ph:x-circle"
-                    className="-mr-1 rtl:mr-0 rtl:-ml-1" // Adjusted class for RTL margin
-                    size="xl"
+          {/* This div becomes the main visual panel with border, shadow, etc. */}
+          <div className="flex-1 flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden m-0 sm:m-1 md:m-2"> {/* Added responsive margin */}
+            <div className="flex flex-col md:flex-row rtl:md:flex-row-reverse items-center px-2 md:px-3 py-2 border-b border-bolt-elements-borderColor">
+              <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
+              <div className="ml-auto rtl:ml-0 rtl:mr-auto mt-2 md:mt-0" />
+              {selectedView === 'code' && (
+                <div className="flex flex-wrap justify-center md:justify-start rtl:md:justify-end overflow-y-auto gap-1 md:gap-0 rtl:flex-row-reverse">
+                  <PanelHeaderButton
+                    className="text-xs md:text-sm"
                     onClick={() => {
-                      workbenchStore.showWorkbench.set(false);
-                    }}
-                  />
-                </div>
-                <div className="relative flex-1 overflow-hidden">
-                  {/* 
-                    Simplified conceptual animation logic for RTL.
-                    A more robust solution might involve a hook or context for direction.
-                    This assumes 'ltr' as default if document is not yet available.
-                  */}
-                  <View 
-                    initial={{ x: '0%' }} 
-                    animate={{ x: selectedView === 'code' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%') }}
-                  >
-                    <EditorPanel
-                      editorDocument={currentDocument}
-                      isStreaming={isStreaming}
-                      selectedFile={selectedFile}
-                      files={files}
-                      unsavedFiles={unsavedFiles}
-                      fileHistory={fileHistory}
-                      onFileSelect={onFileSelect}
-                      onEditorScroll={onEditorScroll}
-                      onEditorChange={onEditorChange}
-                      onFileSave={onFileSave}
-                      onFileReset={onFileReset}
-                    />
-                  </View>
-                  <View
-                    initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
-                    animate={{ 
-                      x: selectedView === 'diff' ? '0%' : 
-                         selectedView === 'code' ? ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') : 
-                                                  ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%') 
+                      workbenchStore.downloadZip();
                     }}
                   >
-                    <Suspense fallback={<div className="p-4 text-center">Loading Diff View...</div>}>
-                      <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
-                    </Suspense>
-                  </View>
-                  <View 
-                    initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }} 
-                    animate={{ x: selectedView === 'preview' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+                    <div className="i-ph:code" />
+                    <span className="hidden sm:inline">Download Code</span>
+                    <span className="sm:hidden">Download</span>
+                  </PanelHeaderButton>
+                  <PanelHeaderButton className="text-xs md:text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
+                    {isSyncing ? <div className="i-ph:spinner" /> : <div className="i-ph:cloud-arrow-down" />}
+                    {isSyncing ? 'Syncing...' : <span className="hidden sm:inline">Sync Files</span>}
+                    {isSyncing || <span className="sm:hidden">Sync</span>}
+                  </PanelHeaderButton>
+                  <PanelHeaderButton
+                    className="text-xs md:text-sm"
+                    onClick={() => {
+                      workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
+                    }}
                   >
-                    <Preview />
-                  </View>
+                    <div className="i-ph:terminal" />
+                    <span className="hidden sm:inline">Toggle Terminal</span>
+                    <span className="sm:hidden">Terminal</span>
+                  </PanelHeaderButton>
+                  <PanelHeaderButton className="text-xs md:text-sm" onClick={() => setIsPushDialogOpen(true)}>
+                    <div className="i-ph:git-branch" />
+                    <span className="hidden sm:inline">Push to GitHub</span>
+                    <span className="sm:hidden">GitHub</span>
+                  </PanelHeaderButton>
                 </div>
-              </div>
+              )}
+              {selectedView === 'diff' && (
+                <FileModifiedDropdown fileHistory={fileHistory} onSelectFile={handleSelectFile} />
+              )}
+              <IconButton
+                icon="i-ph:x-circle"
+                className="-mr-1 rtl:mr-0 rtl:-ml-1" // Adjusted class for RTL margin
+                size="xl"
+                onClick={() => {
+                  workbenchStore.showWorkbench.set(false);
+                }}
+              />
+            </div>
+            <div className="relative flex-1 overflow-hidden">
+              {/*
+                Simplified conceptual animation logic for RTL.
+                A more robust solution might involve a hook or context for direction.
+                This assumes 'ltr' as default if document is not yet available.
+              */}
+              <View
+                initial={{ x: '0%' }}
+                animate={{ x: selectedView === 'code' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%') }}
+              >
+                <EditorPanel
+                  editorDocument={currentDocument}
+                  isStreaming={isStreaming}
+                  selectedFile={selectedFile}
+                  files={files}
+                  unsavedFiles={unsavedFiles}
+                  fileHistory={fileHistory}
+                  onFileSelect={onFileSelect}
+                  onEditorScroll={onEditorScroll}
+                  onEditorChange={onEditorChange}
+                  onFileSave={onFileSave}
+                  onFileReset={onFileReset}
+                />
+              </View>
+              <View
+                initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+                animate={{
+                  x: selectedView === 'diff' ? '0%' :
+                     selectedView === 'code' ? ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') :
+                                              ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '100%' : '-100%')
+                }}
+              >
+                <Suspense fallback={<div className="p-4 text-center">Loading Diff View...</div>}>
+                  <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} actionRunner={actionRunner} />
+                </Suspense>
+              </View>
+              <View
+                initial={{ x: ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+                animate={{ x: selectedView === 'preview' ? '0%' : ((typeof document !== 'undefined' && document.documentElement.dir === 'rtl') ? '-100%' : '100%') }}
+              >
+                <Preview />
+              </View>
             </div>
           </div>
           {isPushDialogOpen && ( // Conditionally render Suspense and Dialog

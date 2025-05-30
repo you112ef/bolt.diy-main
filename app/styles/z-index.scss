@@ -28,6 +28,24 @@ $zIndexMax: 999;
   z-index: $zIndexMax - 1;
 }
 
+// Mobile menu and related components
+.z-menu-overlay {
+  z-index: $zIndexMax - 10; // e.g., 989
+}
+
+.z-mobile-menu {
+  z-index: $zIndexMax - 9; // e.g., 990
+}
+
+// Settings panel, should be above mobile menu if opened from it
+.z-settings-panel {
+  z-index: $zIndexMax - 8; // e.g., 991
+}
+
+.z-settings-panel-loading {
+  z-index: $zIndexMax - 7; // e.g., 992, for the loading fallback of settings
+}
+
 .z-max {
   z-index: $zIndexMax;
 }

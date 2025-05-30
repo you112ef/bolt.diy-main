@@ -634,8 +634,10 @@ export const Preview = memo(() => {
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
-      <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-2">
-        <div className="flex items-center gap-2">
+      {/* Adjusted padding and gap for responsiveness */}
+      <div className="bg-bolt-elements-background-depth-2 p-1 sm:p-2 flex items-center gap-1 sm:gap-2">
+        {/* Adjusted gap for this inner group as well */}
+        <div className="flex items-center gap-1 sm:gap-2">
           <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
           <IconButton
             icon="i-ph:selection"
@@ -644,11 +646,12 @@ export const Preview = memo(() => {
           />
         </div>
 
-        <div className="flex-grow flex items-center gap-1 bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive">
+        {/* Ensure input group itself is responsive in terms of padding/text size if needed, though text-sm is often fine */}
+        <div className="flex-grow flex items-center gap-1 bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive">
           <input
             title="URL"
             ref={inputRef}
-            className="w-full bg-transparent outline-none"
+            className="w-full bg-transparent outline-none"  // text-xs sm:text-sm applied to parent div
             type="text"
             value={url}
             onChange={(event) => {
@@ -666,7 +669,8 @@ export const Preview = memo(() => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Adjusted gap for this inner group as well */}
+        <div className="flex items-center gap-1 sm:gap-2">
           {previews.length > 1 && (
             <PortDropdown
               activePreviewIndex={activePreviewIndex}

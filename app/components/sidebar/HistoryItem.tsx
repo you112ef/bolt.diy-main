@@ -11,9 +11,10 @@ interface HistoryItemProps {
   onDelete?: (event: React.UIEvent) => void;
   onDuplicate?: (id: string) => void;
   exportChat: (id?: string) => void;
+  onItemClick?: () => void; // Added prop
 }
 
-export const HistoryItem = memo(({ item, onDelete, onDuplicate, exportChat }: HistoryItemProps) => { // Wrap with memo
+export const HistoryItem = memo(({ item, onDelete, onDuplicate, exportChat, onItemClick }: HistoryItemProps) => { // Wrap with memo
   const { id: urlId } = useParams();
   const isActiveChat = urlId === item.urlId;
 
@@ -51,7 +52,11 @@ export const HistoryItem = memo(({ item, onDelete, onDuplicate, exportChat }: Hi
           />
         </form>
       ) : (
-        <a href={`/chat/${item.urlId}`} className="flex w-full relative truncate block">
+        <a
+          href={`/chat/${item.urlId}`}
+          className="flex w-full relative truncate block"
+          onClick={() => onItemClick?.()} // Call onItemClick
+        >
           <WithTooltip tooltip={currentDescription}>
             {/* Adjusted pr-[120px] to account for always visible icons (approx 4 icons * (w-5 + p-1*2 for button) + gaps) */}
             {/* Max 4 icons: export, duplicate, rename, delete. Each icon is w-5 (20px). Button has p-1 (8px total width). So ~28px per button.

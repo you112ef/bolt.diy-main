@@ -64,16 +64,17 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                 // For RTL, reverse the main flex direction to move avatar/action buttons to the other side of message content.
                 <div
                   key={messageId} // Changed from key={index} to key={messageId}
-                  className={classNames('flex rtl:flex-row-reverse gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
+                  className={classNames('flex rtl:flex-row-reverse gap-3 sm:gap-4 p-3 sm:p-6 w-full rounded-[calc(0.75rem-1px)]', { // Adjusted padding and gap
                     'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
                     'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
                       isStreaming && isLast,
-                    'mt-4': !isFirst,
+                    'mt-3 sm:mt-4': !isFirst, // Adjusted margin
                   })}
                 >
                   {isUserMessage && (
                     // Avatar is first in LTR (left). In RTL (due to flex-row-reverse), it will be visually last (right).
-                    <div className="flex items-center justify-center w-[40px] h-[40px] overflow-hidden bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-500 rounded-full shrink-0 self-start">
+                    // Reduced avatar size slightly for mobile
+                    <div className="flex items-center justify-center w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] overflow-hidden bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-500 rounded-full shrink-0 self-start">
                       {profile?.avatar ? (
                         <img
                           src={profile.avatar}
@@ -83,7 +84,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                           decoding="sync"
                         />
                       ) : (
-                        <div className="i-ph:user-fill text-2xl" />
+                        <div className="i-ph:user-fill text-xl sm:text-2xl" /> // Adjusted icon size
                       )}
                     </div>
                   )}
@@ -100,7 +101,8 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                   {!isUserMessage && (
                     // Action buttons for assistant messages. In LTR, they are last (right). In RTL (due to flex-row-reverse), they will be visually first (left).
                     // If internal order of buttons needs to change in RTL for lg screens, add rtl:lg:flex-row-reverse here.
-                    <div className="flex gap-2 flex-col lg:flex-row rtl:lg:flex-row-reverse">
+                    // Changed to sm:flex-row to align with other responsive changes, reduced gap for mobile
+                    <div className="flex gap-1 sm:gap-2 flex-col sm:flex-row rtl:sm:flex-row-reverse">
                       {messageId && (
                         <WithTooltip tooltip="Revert to this message">
                           <button
@@ -108,7 +110,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                             key="i-ph:arrow-u-up-left"
                             className={classNames(
                               'i-ph:arrow-u-up-left rtl:i-ph:arrow-u-up-right', // Swaps icon for RTL
-                              'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
+                              'text-lg sm:text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800', // Added padding and hover
                             )}
                           />
                         </WithTooltip>
@@ -120,6 +122,23 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                           key="i-ph:git-fork" // This icon is symmetrical
                           className={classNames(
                             'i-ph:git-fork', // Symmetrical, no change needed
+                            'text-lg sm:text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800', // Added padding and hover
+                          )}
+                        />
+                      </WithTooltip>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          : null}
+        {isStreaming && (
+          <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+        )}
+      </div>
+    );
+  },
+);
                             'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
                           )}
                         />

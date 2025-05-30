@@ -4,9 +4,19 @@ import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { useState } from 'react';
+import { Menu } from '../sidebar/Menu.client';
+import { isMobile } from '~/utils/mobile';
 
 export function Header() {
   const chat = useStore(chatStore);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    if (isMobile()) {
+      setIsMobileMenuOpen(!isMobileMenuOpen);
+    }
+  };
 
   return (
     <header
@@ -21,12 +31,20 @@ export function Header() {
       {/* For RTL, the logo div will be on the right if flex-row-reverse is active.
           Adding rtl:flex-row-reverse to this div to ensure toggle is to the right of logo image in RTL. */}
       <div className="flex items-center rtl:flex-row-reverse gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer mb-2 md:mb-0">
-        {/* Sidebar toggle button - increased icon size and touch target */}
+        {/* Hamburger menu button - visible only on mobile */}
         <button
           aria-label="Toggle sidebar"
-          className="p-2 -m-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" // -m-2 + p-2 = larger tappable area without affecting layout much
+          className="p-2 -m-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden" // -m-2 + p-2 = larger tappable area, md:hidden
+          onClick={toggleMobileMenu}
         >
-          <div className="i-ph:sidebar-simple-duotone text-2xl" /> {/* Increased icon size from text-xl to text-2xl */}
+          <div className="i-ph:list-bold text-2xl" /> {/* Changed icon to hamburger, increased icon size */}
+        </button>
+        {/* Desktop Sidebar toggle button - hidden on mobile */}
+        <button
+          aria-label="Toggle sidebar"
+          className="hidden md:block p-2 -m-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <div className="i-ph:sidebar-simple-duotone text-2xl" />
         </button>
         <a href="/" className="text-2xl font-semibold text-accent flex items-center">
           {/* <span className="i-bolt:logo-text?mask w-[46px] inline-block" /> */}
@@ -34,6 +52,10 @@ export function Header() {
           <img src="/logo-dark-styled.png" alt="logo" className="w-[70px] sm:w-[90px] inline-block hidden dark:block" /> {/* Adjusted logo size */}
         </a>
       </div>
+      {/* Mobile Menu passed here - it will be positioned via its own styles */}
+      <ClientOnly>
+        {() => <Menu isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />}
+      </ClientOnly>
       {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
         <>
           {/* ChatDescription is visually in the middle, order-last helps in flex-col. 
