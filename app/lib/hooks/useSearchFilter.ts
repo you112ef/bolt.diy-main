@@ -35,7 +35,8 @@ export function useSearchFilter({
       searchFields.some((field) => {
         const value = item[field];
 
-        if (typeof value === 'string') {
+        // Ensure value is truthy and a string before calling toLowerCase
+        if (value && typeof value === 'string') {
           return value.toLowerCase().includes(query);
         }
 
