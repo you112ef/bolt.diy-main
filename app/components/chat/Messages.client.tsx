@@ -139,20 +139,3 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
     );
   },
 );
-                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                          )}
-                        />
-                      </WithTooltip>
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          : null}
-        {isStreaming && (
-          <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
-        )}
-      </div>
-    );
-  },
-);
