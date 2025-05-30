@@ -65,10 +65,10 @@ export default function ProfileTab() {
         {/* Personal Information Section */}
         <div>
           {/* Avatar Upload */}
-          <div className="flex items-start gap-6 mb-8">
+          <div className="flex flex-col xs:flex-row items-center xs:items-start text-center xs:text-left gap-4 xs:gap-6 mb-8"> {/* Responsive layout */}
             <div
               className={classNames(
-                'w-24 h-24 rounded-full overflow-hidden',
+                'w-24 h-24 rounded-full overflow-hidden shrink-0', // Added shrink-0 for flex context
                 'bg-gray-100 dark:bg-gray-800/50',
                 'flex items-center justify-center',
                 'ring-1 ring-gray-200 dark:ring-gray-700',
@@ -116,7 +116,7 @@ export default function ProfileTab() {
               </label>
             </div>
 
-            <div className="flex-1 pt-1">
+            <div className="flex-1 xs:pt-1"> {/* Removed pt-1 for stacked, keep for row */}
               <label className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-1">
                 Profile Picture
               </label>

@@ -759,8 +759,8 @@ export function DataTab() {
 
       {/* Undo Last Operation */}
       {lastOperation && (
-        <div className="fixed bottom-4 right-4 bg-bolt-elements-bg-depth-3 text-bolt-elements-textPrimary p-4 rounded-lg shadow-lg flex items-center gap-3 z-50">
-          <div className="text-sm">
+        <div className="fixed bottom-4 right-4 left-4 sm:left-auto bg-bolt-elements-bg-depth-3 text-bolt-elements-textPrimary p-3 sm:p-4 rounded-lg shadow-lg flex flex-col sm:flex-row items-center gap-2 sm:gap-3 z-50"> {/* Responsive positioning and padding */}
+          <div className="text-sm text-center sm:text-left"> {/* Responsive text alignment */}
             <span className="font-medium">Last action:</span> {lastOperation.type}
           </div>
           <Button

@@ -396,7 +396,7 @@ export default function LocalProvidersTab() {
         transition={{ duration: 0.3 }}
       >
         {/* Header section */}
-        <div className="flex items-center justify-between gap-4 border-b border-bolt-elements-borderColor pb-4">
+        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-4 border-b border-bolt-elements-borderColor pb-4"> {/* Responsive header */}
           <div className="flex items-center gap-3">
             <motion.div
               className={classNames(

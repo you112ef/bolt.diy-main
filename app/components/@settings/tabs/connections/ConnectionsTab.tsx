@@ -1,20 +1,21 @@
 import { motion } from 'framer-motion';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, lazy } from 'react'; // Added lazy
 import { classNames } from '~/utils/classNames';
 import ConnectionDiagnostics from './ConnectionDiagnostics';
 import { Button } from '~/components/ui/Button';
-import VercelConnection from './VercelConnection';
+// import VercelConnection from './VercelConnection'; // To be lazy loaded
 
 // Use React.lazy for dynamic imports
-const GitHubConnection = React.lazy(() => import('./GithubConnection'));
-const NetlifyConnection = React.lazy(() => import('./NetlifyConnection'));
+const GitHubConnection = lazy(() => import('./GithubConnection'));
+const NetlifyConnection = lazy(() => import('./NetlifyConnection'));
+const VercelConnection = lazy(() => import('./VercelConnection')); // Lazy loaded VercelConnection
 
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="p-4 bg-bolt-elements-background-depth-1 dark:bg-bolt-elements-background-depth-1 rounded-lg border border-bolt-elements-borderColor dark:border-bolt-elements-borderColor">
     <div className="flex items-center justify-center gap-2 text-bolt-elements-textSecondary dark:text-bolt-elements-textSecondary">
       <div className="i-ph:spinner-gap w-4 h-4 animate-spin" />
-      <span>Loading connection...</span>
+      <span className="text-sm">Loading connection...</span> {/* Added text-sm */}
     </div>
   </div>
 );
@@ -27,14 +28,14 @@ export default function ConnectionsTab() {
     <div className="space-y-6">
       {/* Header */}
       <motion.div
-        className="flex items-center justify-between gap-2"
+        className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2" /* Responsive header layout */
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         <div className="flex items-center gap-2">
           <div className="i-ph:plugs-connected w-5 h-5 text-bolt-elements-item-contentAccent dark:text-bolt-elements-item-contentAccent" />
-          <h2 className="text-lg font-medium text-bolt-elements-textPrimary dark:text-bolt-elements-textPrimary">
+          <h2 className="text-base sm:text-lg font-medium text-bolt-elements-textPrimary dark:text-bolt-elements-textPrimary"> {/* Responsive title */}
             Connection Settings
           </h2>
         </div>
@@ -70,7 +71,7 @@ export default function ConnectionsTab() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="p-6">
+        <div className="p-3 sm:p-4 md:p-6"> {/* Responsive padding for Env Var section */}
           <button
             onClick={() => setIsEnvVarsExpanded(!isEnvVarsExpanded)}
             className={classNames(

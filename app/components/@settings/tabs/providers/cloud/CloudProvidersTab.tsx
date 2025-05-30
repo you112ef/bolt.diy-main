@@ -138,7 +138,7 @@ const CloudProvidersTab = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center justify-between gap-4 mt-8 mb-4">
+        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-4 mt-8 mb-4"> {/* Responsive header */}
           <div className="flex items-center gap-2">
             <div
               className={classNames(
