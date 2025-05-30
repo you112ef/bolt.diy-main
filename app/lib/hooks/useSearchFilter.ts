@@ -25,24 +25,27 @@ export function useSearchFilter({
   );
 
   const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return items;
+    // Ensure searchQuery is a string before calling toLowerCase
+    const safeSearchQuery = (typeof searchQuery === 'string' ? searchQuery : '');
+    if (!safeSearchQuery.trim()) {
+      return items; // Return all items if search query is effectively empty
     }
+    const query = safeSearchQuery.toLowerCase();
 
-    const query = searchQuery.toLowerCase();
+    return items.filter((item) => {
+      if (!item) return false; // Add a guard against undefined/null items in the array
 
-    return items.filter((item) =>
-      searchFields.some((field) => {
-        const value = item[field];
+      return searchFields.some((field) => {
+        const rawValue = item[field];
+        // Ensure rawValue is converted to a string (empty if not stringable)
+        // before calling toLowerCase.
+        const valueStr = (rawValue !== null && rawValue !== undefined && typeof rawValue.toString === 'function')
+                         ? String(rawValue)
+                         : '';
 
-        // Ensure value is truthy and a string before calling toLowerCase
-        if (value && typeof value === 'string') {
-          return value.toLowerCase().includes(query);
-        }
-
-        return false;
-      }),
-    );
+        return valueStr.toLowerCase().includes(query);
+      });
+    });
   }, [items, searchQuery, searchFields]);
 
   return {
