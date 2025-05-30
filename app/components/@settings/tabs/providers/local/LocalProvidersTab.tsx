@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { classNames } from '~/utils/classNames';
 import { BsRobot } from 'react-icons/bs';
 import type { IconType } from 'react-icons';
-import { BiChip, BiCpu } from 'react-icons/bi'; // Added BiCpu for LlamaCpp
+import { BiChip } from 'react-icons/bi'; // Removed BiCpu
 import { TbBrandOpenai } from 'react-icons/tb';
+import { Cpu } from 'lucide-react'; // Added Cpu from lucide-react
 import { providerBaseUrlEnvKeys } from '~/utils/constants';
 import { useToast } from '~/components/ui/use-toast';
 import { Progress } from '~/components/ui/Progress';
@@ -23,7 +24,7 @@ const PROVIDER_ICONS: Record<ProviderName, IconType> = {
   Ollama: BsRobot,
   LMStudio: BsRobot,
   OpenAILike: TbBrandOpenai,
-  LlamaCpp: BiCpu, // Added LlamaCpp icon
+  LlamaCpp: Cpu, // Changed to Cpu from lucide-react
 };
 
 // Update PROVIDER_DESCRIPTIONS to use the same type
