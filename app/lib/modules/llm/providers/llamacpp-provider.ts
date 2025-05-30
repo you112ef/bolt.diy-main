@@ -4,7 +4,7 @@ import type { IProviderSetting } from '~/types/model';
 import { createOpenAI, type OpenAIProvider as AIOPENAIProvider } from '@ai-sdk/openai';
 import type { LanguageModelV1, LanguageModelV1StreamPart } from 'ai';
 import { AIError, type PromptOptions, type ReadStream } from 'ai';
-import { type Env } from '~/types/global';
+import { type Env } from '~/types/env'; // Updated import path
 import { logger } from '~/utils/logger';
 
 // Helper to transform the AI SDK stream to the project's expected AIStreamChunk format

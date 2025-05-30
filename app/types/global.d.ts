@@ -11,5 +11,3 @@ interface Performance {
     usedJSHeapSize: number;
   };
 }
-
-export type Env = Record<string, any>;
