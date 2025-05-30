@@ -3,7 +3,7 @@ import type { ModelInfo, AIStreamChunk } from '~/lib/modules/llm/types';
 import type { IProviderSetting } from '~/types/model';
 import { createOpenAI, type OpenAIProvider as AIOPENAIProvider } from '@ai-sdk/openai';
 import type { LanguageModelV1, LanguageModelV1StreamPart } from 'ai';
-import { AIError, type PromptOptions, type ReadStream } from 'ai';
+import { type PromptOptions, type ReadStream } from 'ai'; // Removed AIError
 import { type Env } from '~/types/env'; // Updated import path
 import { logger } from '~/utils/logger';
 
@@ -22,7 +22,9 @@ async function* readableStreamToAIStreamChunk(
       // console.log('Stream finished:', part.finishReason, part.usage);
     } else if (part.type === 'error') {
       logger.error('Error in LLaMA.cpp stream:', part.error);
-      throw new AIError(part.error.message, part.error);
+      // Use standard Error, check if part.error is string or an object with message
+      const errorMessage = typeof part.error === 'string' ? part.error : (part.error as Error)?.message || 'Unknown stream error';
+      throw new Error(errorMessage);
     }
   }
 }
@@ -173,11 +175,8 @@ export class LlamaCppProvider extends BaseProvider {
       return readableStreamToAIStreamChunk(stream);
     } catch (error: any) {
       logger.error('Error fetching LLaMA.cpp stream:', error);
-      // Transform to AIError or a project-specific error type if needed
-      throw new AIError(
-        `LLaMA.cpp API error: ${error.message || 'Failed to fetch stream'}`,
-        error.cause || error,
-      );
+      // Use standard Error
+      throw new Error(`LLaMA.cpp API error: ${error.message || 'Failed to fetch stream'}`);
     }
   }
 }
