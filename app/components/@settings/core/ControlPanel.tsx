@@ -504,8 +504,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 <div
                   className={classNames(
                     'flex-1',
-                    'overflow-y-auto',
-                    'hover:overflow-y-auto',
+                    'overflow-y-auto overflow-x-hidden', // Added overflow-x-hidden
+                    'hover:overflow-y-auto', // This hover variant for overflow seems odd, usually not needed
                     'scrollbar scrollbar-w-2',
                     'scrollbar-track-transparent',
                     'scrollbar-thumb-[#E5E5E5] hover:scrollbar-thumb-[#CCCCCC]',

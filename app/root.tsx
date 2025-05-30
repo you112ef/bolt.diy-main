@@ -83,12 +83,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [language]);
 
+  // Add a wrapper div for Layout to apply w-full, h-full, and overflow-x-hidden
   return (
-    <>
+    <div className="w-full h-full overflow-x-hidden">
       <ClientOnly>{() => <DndProvider backend={HTML5Backend}>{children}</DndProvider>}</ClientOnly>
       <ScrollRestoration />
       <Scripts />
-    </>
+    </div>
   );
 }
 
