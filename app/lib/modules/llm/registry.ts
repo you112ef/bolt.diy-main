@@ -5,7 +5,7 @@ import GoogleProvider from './providers/google';
 import GroqProvider from './providers/groq';
 import HuggingFaceProvider from './providers/huggingface';
 import LMStudioProvider from './providers/lmstudio';
-import LlamaCppProvider from './providers/llamacpp-provider'; // Import LlamaCppProvider
+import { LlamaCppProvider } from './providers/llamacpp-provider'; // Changed to named import
 import MistralProvider from './providers/mistral';
 import OllamaProvider from './providers/ollama';
 import OpenRouterProvider from './providers/open-router';
