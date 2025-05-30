@@ -20,9 +20,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, imageDataList, onRemov
               <img src={imageDataList[index]} alt={file.name} className="max-h-20" />
               <button
                 onClick={() => onRemove(index)}
-                className="absolute top-1 right-1 z-10 bg-black rounded-full w-5 h-5 shadow-md hover:bg-gray-900 transition-colors flex items-center justify-center"
+                className="absolute top-0 right-0 z-10 bg-black bg-opacity-70 hover:bg-opacity-100 rounded-full w-6 h-6 shadow-md transition-colors flex items-center justify-center"
               >
-                <div className="i-ph:x w-3 h-3 text-gray-200" />
+                <div className="i-ph:x w-3.5 h-3.5 text-gray-100" />
               </button>
             </div>
           )}

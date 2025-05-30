@@ -1,7 +1,8 @@
 /* Color Tokens Light Theme */
 :root,
 :root[data-theme='light'] {
-  --bolt-elements-borderColor: theme('colors.alpha.gray.10');
+  --bolt-elements-borderColor: theme('colors.alpha.gray.10'); // General decorative border
+  --bolt-elements-inputBorderColor: theme('colors.gray.300'); // More visible border for inputs
   --bolt-elements-borderColorActive: theme('colors.accent.600');
 
   --bolt-elements-bg-depth-1: theme('colors.white');
@@ -11,7 +12,7 @@
 
   --bolt-elements-textPrimary: theme('colors.gray.950');
   --bolt-elements-textSecondary: theme('colors.gray.600');
-  --bolt-elements-textTertiary: theme('colors.gray.500');
+  --bolt-elements-textTertiary: theme('colors.gray.600'); // Was gray.500, improved contrast
 
   --bolt-elements-code-background: theme('colors.gray.100');
   --bolt-elements-code-text: theme('colors.gray.950');
@@ -104,20 +105,20 @@
   --bolt-terminal-brightWhite: #a5a5a5;
 }
 
-/* Color Tokens Dark Theme */
-:root,
+/* Color Tokens Dark Theme (OLED Optimized) */
 :root[data-theme='dark'] {
-  --bolt-elements-borderColor: theme('colors.alpha.white.10');
+  --bolt-elements-borderColor: theme('colors.alpha.white.10'); // General decorative border, very subtle on black
+  --bolt-elements-inputBorderColor: theme('colors.gray.700'); // More visible border for inputs (was gray.800)
   --bolt-elements-borderColorActive: theme('colors.accent.500');
 
-  --bolt-elements-bg-depth-1: theme('colors.gray.950');
-  --bolt-elements-bg-depth-2: theme('colors.gray.900');
-  --bolt-elements-bg-depth-3: theme('colors.gray.800');
-  --bolt-elements-bg-depth-4: theme('colors.alpha.white.5');
+  --bolt-elements-bg-depth-1: theme('colors.black'); // True black for OLED
+  --bolt-elements-bg-depth-2: theme('colors.gray.900'); // Very dark gray for slight depth
+  --bolt-elements-bg-depth-3: theme('colors.gray.800'); // Darker gray
+  --bolt-elements-bg-depth-4: theme('colors.alpha.white.5'); // Subtle overlay
 
   --bolt-elements-textPrimary: theme('colors.white');
   --bolt-elements-textSecondary: theme('colors.gray.400');
-  --bolt-elements-textTertiary: theme('colors.gray.500');
+  --bolt-elements-textTertiary: theme('colors.gray.400'); // Was gray.500, improved contrast
 
   --bolt-elements-code-background: theme('colors.gray.800');
   --bolt-elements-code-text: theme('colors.white');

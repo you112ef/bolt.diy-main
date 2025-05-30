@@ -14,6 +14,8 @@ interface ModelSelectorProps {
   providerList: ProviderInfo[];
   apiKeys: Record<string, string>;
   modelLoading?: string;
+  isOnline?: boolean; // New prop
+  isLocalProviderSelected?: boolean; // New prop
 }
 
 export const ModelSelector = ({
@@ -24,6 +26,8 @@ export const ModelSelector = ({
   modelList,
   providerList,
   modelLoading,
+  isOnline = true, // Default to true
+  isLocalProviderSelected = false, // Default to false
 }: ModelSelectorProps) => {
   const [modelSearchQuery, setModelSearchQuery] = useState('');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -213,7 +217,14 @@ export const ModelSelector = ({
           tabIndex={0}
         >
           <div className="flex items-center justify-between">
-            <div className="truncate">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
+            <div className="truncate">
+              {modelList.find((m) => m.name === model)?.label || 'Select model'}
+              {isLocalProviderSelected && (
+                <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                  Local
+                </span>
+              )}
+            </div>
             <div
               className={classNames(
                 'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',

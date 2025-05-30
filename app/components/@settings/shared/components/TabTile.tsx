@@ -34,8 +34,8 @@ export const TabTile: React.FC<TabTileProps> = ({
           <motion.div
             onClick={onClick}
             className={classNames(
-              'relative flex flex-col items-center p-6 rounded-xl',
-              'w-full h-full min-h-[160px]',
+              'relative flex flex-col items-center p-3 sm:p-4 md:p-6 rounded-xl', // Responsive padding
+              'w-full h-full min-h-[160px]', // min-h is likely fine, parent div controls aspect/min-height too
               'bg-white dark:bg-[#141414]',
               'border border-[#E5E5E5] dark:border-[#333333]',
               'group',
@@ -74,10 +74,10 @@ export const TabTile: React.FC<TabTileProps> = ({
               </motion.div>
 
               {/* Label and Description */}
-              <div className="flex flex-col items-center mt-5 w-full">
+              <div className="flex flex-col items-center mt-3 sm:mt-4 md:mt-5 w-full"> {/* Responsive margin-top */}
                 <h3
                   className={classNames(
-                    'text-[15px] font-medium leading-snug mb-2',
+                    'text-sm sm:text-[15px] font-medium leading-snug mb-1 sm:mb-2', // Responsive text & margin
                     'text-gray-700 dark:text-gray-200',
                     'group-hover:text-purple-600 dark:group-hover:text-purple-300/90',
                     isActive ? 'text-purple-500 dark:text-purple-400/90' : '',
@@ -88,9 +88,9 @@ export const TabTile: React.FC<TabTileProps> = ({
                 {description && (
                   <p
                     className={classNames(
-                      'text-[13px] leading-relaxed',
+                      'text-xs sm:text-[13px] leading-relaxed', // Responsive text
                       'text-gray-500 dark:text-gray-400',
-                      'max-w-[85%]',
+                      'max-w-[90%] sm:max-w-[85%]', // Slightly more width for description on small screens
                       'text-center',
                       'group-hover:text-purple-500 dark:group-hover:text-purple-400/70',
                       isActive ? 'text-purple-400 dark:text-purple-400/80' : '',

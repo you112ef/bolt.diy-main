@@ -19,6 +19,8 @@ import { BaseChat } from './BaseChat';
 import Cookies from 'js-cookie';
 import { debounce } from '~/utils/debounce';
 import { useSettings } from '~/lib/hooks/useSettings';
+import { useNetworkStatus } from '~/lib/hooks/useNetworkStatus'; // Import useNetworkStatus
+import { LOCAL_PROVIDERS } from '~/lib/stores/settings'; // Import LOCAL_PROVIDERS
 import type { ProviderInfo } from '~/types/model';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
@@ -116,6 +118,9 @@ export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
 
+    const isOnline = useNetworkStatus();
+    const { providers: allProviderSettings, activeProviders, promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings(); // Use allProviderSettings to check enabled status
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -129,16 +134,22 @@ export const ChatImpl = memo(
       (project) => project.id === supabaseConn.selectedProjectId,
     );
     const supabaseAlert = useStore(workbenchStore.supabaseAlert);
-    const { activeProviders, promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
+    // activeProviders is already available from useSettings() above.
 
     const [model, setModel] = useState(() => {
       const savedModel = Cookies.get('selectedModel');
       return savedModel || DEFAULT_MODEL;
     });
-    const [provider, setProvider] = useState(() => {
-      const savedProvider = Cookies.get('selectedProvider');
-      return (PROVIDER_LIST.find((p) => p.name === savedProvider) || DEFAULT_PROVIDER) as ProviderInfo;
+    const [provider, setProvider] = useState<ProviderInfo>(() => { // Ensure ProviderInfo type for provider state
+      const savedProviderName = Cookies.get('selectedProvider');
+      const foundProvider = PROVIDER_LIST.find((p) => p.name === savedProviderName);
+      return (foundProvider || DEFAULT_PROVIDER) as ProviderInfo;
     });
+
+    const [previousOnlineProvider, setPreviousOnlineProvider] = useState<ProviderInfo | null>(null);
+    const [previousOnlineModel, setPreviousOnlineModel] = useState<string | null>(null);
+    const [showOfflineModeAlert, setShowOfflineModeAlert] = useState(false);
+    const [offlineModeProviderName, setOfflineModeProviderName] = useState<string | null>(null);
 
     const { showChat } = useStore(chatStore);
 
@@ -491,6 +502,62 @@ export const ChatImpl = memo(
       }
     }, []);
 
+    // Effect for handling online/offline status changes
+    useEffect(() => {
+      if (!isOnline) {
+        // Went offline
+        const currentProviderIsLocal = LOCAL_PROVIDERS.includes(provider.name);
+        if (currentProviderIsLocal) {
+          // Already using a local provider, just show alert
+          setShowOfflineModeAlert(true);
+          setOfflineModeProviderName(provider.name);
+          return;
+        }
+
+        // Find first available enabled local provider
+        let switchedToLocal = false;
+        for (const localProviderName of LOCAL_PROVIDERS) {
+          const localProviderSettings = allProviderSettings[localProviderName];
+          if (localProviderSettings?.settings.enabled) {
+            const localProviderInfo = PROVIDER_LIST.find(p => p.name === localProviderName) as ProviderInfo | undefined;
+            if (localProviderInfo && localProviderInfo.staticModels && localProviderInfo.staticModels.length > 0) {
+              setPreviousOnlineProvider(provider);
+              setPreviousOnlineModel(model);
+
+              setProvider(localProviderInfo);
+              setModel(localProviderInfo.staticModels[0].id);
+              Cookies.set('selectedProvider', localProviderInfo.name, { expires: 30 });
+              Cookies.set('selectedModel', localProviderInfo.staticModels[0].id, { expires: 30 });
+
+              setShowOfflineModeAlert(true);
+              setOfflineModeProviderName(localProviderInfo.name);
+              toast.info(`Network offline. Switched to local model: ${localProviderInfo.staticModels[0].name}.`);
+              switchedToLocal = true;
+              break;
+            }
+          }
+        }
+        if (!switchedToLocal) {
+          toast.error("Network offline, and no enabled local provider found. Chat functionality may be limited.");
+        }
+      } else {
+        // Went online
+        setShowOfflineModeAlert(false);
+        setOfflineModeProviderName(null);
+        // Optional: Logic to switch back to previousOnlineProvider if set
+        if (previousOnlineProvider && previousOnlineModel) {
+          // Example: Simple switch back, could be a notification/prompt for user
+          // setProvider(previousOnlineProvider);
+          // setModel(previousOnlineModel);
+          // Cookies.set('selectedProvider', previousOnlineProvider.name, { expires: 30 });
+          // Cookies.set('selectedModel', previousOnlineModel, { expires: 30 });
+          // setPreviousOnlineProvider(null);
+          // setPreviousOnlineModel(null);
+          // toast.info("Network back online. You can now switch to other providers.");
+        }
+      }
+    }, [isOnline, provider, model, allProviderSettings, setProvider, setModel]);
+
     const handleModelChange = (newModel: string) => {
       setModel(newModel);
       Cookies.set('selectedModel', newModel, { expires: 30 });
@@ -499,12 +566,20 @@ export const ChatImpl = memo(
     const handleProviderChange = (newProvider: ProviderInfo) => {
       setProvider(newProvider);
       Cookies.set('selectedProvider', newProvider.name, { expires: 30 });
+      // If user manually changes provider while offline alert is shown for another provider, hide it.
+      if (showOfflineModeAlert && newProvider.name !== offlineModeProviderName) {
+        setShowOfflineModeAlert(false);
+        setOfflineModeProviderName(null);
+      }
     };
 
     return (
       <BaseChat
         ref={animationScope}
         textareaRef={textareaRef}
+        isOnline={isOnline} // Pass isOnline status
+        showOfflineModeAlert={showOfflineModeAlert}
+        offlineModeProviderName={offlineModeProviderName}
         input={input}
         showChat={showChat}
         chatStarted={chatStarted}

@@ -22,3 +22,8 @@ body {
   // --secondary-color: rgba(138, 43, 226, var(--gradient-opacity));
   // --accent-color: rgba(180, 170, 220, var(--gradient-opacity));
 }
+
+[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}

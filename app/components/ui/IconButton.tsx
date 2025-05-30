@@ -46,7 +46,7 @@ export const IconButton = memo(
         <button
           ref={ref}
           className={classNames(
-            'flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-1 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed',
+            'flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-2.5 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed', // Increased padding from p-1 to p-2.5
             {
               [classNames('opacity-30', disabledClassName)]: disabled,
             },

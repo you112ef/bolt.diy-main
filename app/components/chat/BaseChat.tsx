@@ -75,6 +75,10 @@ interface BaseChatProps {
   clearSupabaseAlert?: () => void;
   data?: JSONValue[] | undefined;
   actionRunner?: ActionRunner;
+  // New props for offline status
+  isOnline?: boolean;
+  showOfflineModeAlert?: boolean;
+  offlineModeProviderName?: string | null;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -113,6 +117,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       clearSupabaseAlert,
       data,
       actionRunner,
+      // Destructure new props
+      isOnline = true, // Default to true if not provided
+      showOfflineModeAlert = false,
+      offlineModeProviderName = null,
     },
     ref,
   ) => {
@@ -365,6 +373,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 })}
               >
                 <div className="bg-bolt-elements-background-depth-2">
+                  {/* Offline Mode Alert */}
+                  {showOfflineModeAlert && offlineModeProviderName && (
+                    <div className="p-3 mb-3 text-sm text-yellow-700 bg-yellow-100 border border-yellow-300 rounded-md dark:bg-yellow-900 dark:text-yellow-300 dark:border-yellow-700">
+                      You are currently offline. Using local AI model: <strong>{offlineModeProviderName} - {modelList.find(m => m.id === model)?.name || model}</strong>.
+                    </div>
+                  )}
                   {actionAlert && (
                     <ChatAlert
                       alert={actionAlert}
@@ -428,6 +442,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                             providerList={providerList || (PROVIDER_LIST as ProviderInfo[])}
                             apiKeys={apiKeys}
                             modelLoading={isModelLoading}
+                            // Pass down network status and if current provider is local
+                            isOnline={isOnline}
+                            isLocalProviderSelected={provider?.type === 'local'}
                           />
                           {(providerList || []).length > 0 &&
                             provider &&
@@ -534,7 +551,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         minHeight: TEXTAREA_MIN_HEIGHT,
                         maxHeight: TEXTAREA_MAX_HEIGHT,
                       }}
-                      placeholder="How can Bolt help you today?"
+                      placeholder="Type your message or custom prompt here..." // Updated placeholder
                       translate="no"
                     />
                     <ClientOnly>

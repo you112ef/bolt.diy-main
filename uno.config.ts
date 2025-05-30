@@ -21,6 +21,7 @@ const customIconCollection = iconPaths.reduce(
 
 const BASE_COLORS = {
   white: '#FFFFFF',
+  black: '#000000', // Added true black
   gray: {
     50: '#FAFAFA',
     100: '#F5F5F5',

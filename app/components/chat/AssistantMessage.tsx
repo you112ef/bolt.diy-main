@@ -64,17 +64,17 @@ export const AssistantMessage = memo(({ content, annotations }: AssistantMessage
           {(codeContext || chatSummary) && (
             <Popover side="right" align="start" trigger={<div className="i-ph:info" />}>
               {chatSummary && (
-                <div className="max-w-chat">
+                <div className="max-w-chat p-2"> {/* Added padding to popover content */}
                   <div className="summary max-h-96 flex flex-col">
-                    <h2 className="border border-bolt-elements-borderColor rounded-md p4">Summary</h2>
-                    <div style={{ zoom: 0.7 }} className="overflow-y-auto m4">
+                    <h2 className="border border-bolt-elements-borderColor rounded-md p-2 text-base">Summary</h2> {/* Adjusted padding and text size */}
+                    <div className="overflow-y-auto m-1 text-sm"> {/* Removed zoom, adjusted margin and text size */}
                       <Markdown>{chatSummary}</Markdown>
                     </div>
                   </div>
                   {codeContext && (
-                    <div className="code-context flex flex-col p4 border border-bolt-elements-borderColor rounded-md">
-                      <h2>Context</h2>
-                      <div className="flex gap-4 mt-4 bolt" style={{ zoom: 0.6 }}>
+                    <div className="code-context flex flex-col p-2 mt-2 border border-bolt-elements-borderColor rounded-md"> {/* Adjusted padding */}
+                      <h2 className="text-base">Context</h2> {/* Added text size */}
+                      <div className="flex flex-wrap gap-2 mt-2"> {/* Changed to flex-wrap, adjusted gap, removed zoom */}
                         {codeContext.map((x) => {
                           const normalized = normalizedFilePath(x);
                           return (

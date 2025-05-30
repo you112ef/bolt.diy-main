@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { classNames } from '~/utils/classNames';
 import { BsRobot } from 'react-icons/bs';
 import type { IconType } from 'react-icons';
-import { BiChip } from 'react-icons/bi';
+import { BiChip, BiCpu } from 'react-icons/bi'; // Added BiCpu for LlamaCpp
 import { TbBrandOpenai } from 'react-icons/tb';
 import { providerBaseUrlEnvKeys } from '~/utils/constants';
 import { useToast } from '~/components/ui/use-toast';
@@ -16,13 +16,14 @@ import { Progress } from '~/components/ui/Progress';
 import OllamaModelInstaller from './OllamaModelInstaller';
 
 // Add type for provider names to ensure type safety
-type ProviderName = 'Ollama' | 'LMStudio' | 'OpenAILike';
+type ProviderName = 'Ollama' | 'LMStudio' | 'OpenAILike' | 'LlamaCpp'; // Added LlamaCpp
 
 // Update the PROVIDER_ICONS type to use the ProviderName type
 const PROVIDER_ICONS: Record<ProviderName, IconType> = {
   Ollama: BsRobot,
   LMStudio: BsRobot,
   OpenAILike: TbBrandOpenai,
+  LlamaCpp: BiCpu, // Added LlamaCpp icon
 };
 
 // Update PROVIDER_DESCRIPTIONS to use the same type
@@ -30,6 +31,7 @@ const PROVIDER_DESCRIPTIONS: Record<ProviderName, string> = {
   Ollama: 'Run open-source models locally on your machine',
   LMStudio: 'Local model inference with LM Studio',
   OpenAILike: 'Connect to OpenAI-compatible API endpoints',
+  LlamaCpp: 'Local inference with LLaMA.cpp server', // Added LlamaCpp description
 };
 
 // Add a constant for the Ollama API base URL
@@ -680,6 +682,13 @@ export default function LocalProvidersTab() {
                         <p className="text-sm text-bolt-elements-textSecondary mt-1">
                           {PROVIDER_DESCRIPTIONS[provider.name as ProviderName]}
                         </p>
+                        {/* Display static model info for LlamaCpp */}
+                        {provider.name === 'LlamaCpp' && provider.staticModels && provider.staticModels.length > 0 && (
+                          <div className="mt-2 text-xs text-bolt-elements-textTertiary">
+                            <p><strong>Model:</strong> {provider.staticModels[0].name}</p>
+                            <p>{provider.staticModels[0].description}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <Switch

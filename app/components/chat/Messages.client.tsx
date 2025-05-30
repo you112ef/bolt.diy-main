@@ -8,6 +8,7 @@ import { db, chatId } from '~/lib/persistence/useChatHistory';
 import { forkChat } from '~/lib/persistence/db';
 import { toast } from 'react-toastify';
 import WithTooltip from '~/components/ui/Tooltip';
+import { IconButton } from '~/components/ui/IconButton'; // Import IconButton
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
 import { forwardRef } from 'react';
@@ -63,7 +64,7 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
               return (
                 <div
                   key={index}
-                  className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
+                  className={classNames('flex gap-4 p-3 sm:p-6 w-full rounded-[calc(0.75rem-1px)]', { // Responsive padding
                     'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
                     'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
                       isStreaming && isLast,
@@ -93,28 +94,26 @@ export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
                     )}
                   </div>
                   {!isUserMessage && (
-                    <div className="flex gap-2 flex-col lg:flex-row">
+                    <div className="flex gap-2 flex-col lg:flex-row items-center"> {/* Added items-center for better alignment with IconButton */}
                       {messageId && (
                         <WithTooltip tooltip="Revert to this message">
-                          <button
+                          <IconButton
                             onClick={() => handleRewind(messageId)}
-                            key="i-ph:arrow-u-up-left"
-                            className={classNames(
-                              'i-ph:arrow-u-up-left',
-                              'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                            )}
+                            icon="i-ph:arrow-u-up-left"
+                            size="xl" // Corresponds to text-xl
+                            className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                            title="Revert to this message" // Accessibility
                           />
                         </WithTooltip>
                       )}
 
                       <WithTooltip tooltip="Fork chat from this message">
-                        <button
+                        <IconButton
                           onClick={() => handleFork(messageId)}
-                          key="i-ph:git-fork"
-                          className={classNames(
-                            'i-ph:git-fork',
-                            'text-xl text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors',
-                          )}
+                          icon="i-ph:git-fork"
+                          size="xl" // Corresponds to text-xl
+                          className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+                          title="Fork chat from this message" // Accessibility
                         />
                       </WithTooltip>
                     </div>

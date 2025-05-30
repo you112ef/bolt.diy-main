@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'; // Added lazy, Suspense
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@nanostores/react';
 import { Switch } from '@radix-ui/react-switch';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { classNames } from '~/utils/classNames';
-import { TabManagement } from '~/components/@settings/shared/components/TabManagement';
+// import { TabManagement } from '~/components/@settings/shared/components/TabManagement'; // Lazy loaded
 import { TabTile } from '~/components/@settings/shared/components/TabTile';
 import { useUpdateCheck } from '~/lib/hooks/useUpdateCheck';
 import { useFeatures } from '~/lib/hooks/useFeatures';
@@ -24,20 +24,28 @@ import { DialogTitle } from '~/components/ui/Dialog';
 import { AvatarDropdown } from './AvatarDropdown';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 
-// Import all tab components
-import ProfileTab from '~/components/@settings/tabs/profile/ProfileTab';
-import SettingsTab from '~/components/@settings/tabs/settings/SettingsTab';
-import NotificationsTab from '~/components/@settings/tabs/notifications/NotificationsTab';
-import FeaturesTab from '~/components/@settings/tabs/features/FeaturesTab';
-import { DataTab } from '~/components/@settings/tabs/data/DataTab';
-import DebugTab from '~/components/@settings/tabs/debug/DebugTab';
-import { EventLogsTab } from '~/components/@settings/tabs/event-logs/EventLogsTab';
-import UpdateTab from '~/components/@settings/tabs/update/UpdateTab';
-import ConnectionsTab from '~/components/@settings/tabs/connections/ConnectionsTab';
-import CloudProvidersTab from '~/components/@settings/tabs/providers/cloud/CloudProvidersTab';
-import ServiceStatusTab from '~/components/@settings/tabs/providers/status/ServiceStatusTab';
-import LocalProvidersTab from '~/components/@settings/tabs/providers/local/LocalProvidersTab';
-import TaskManagerTab from '~/components/@settings/tabs/task-manager/TaskManagerTab';
+// Lazy load all tab components
+const ProfileTab = lazy(() => import('~/components/@settings/tabs/profile/ProfileTab'));
+const SettingsTab = lazy(() => import('~/components/@settings/tabs/settings/SettingsTab'));
+const NotificationsTab = lazy(() => import('~/components/@settings/tabs/notifications/NotificationsTab'));
+const FeaturesTab = lazy(() => import('~/components/@settings/tabs/features/FeaturesTab'));
+const DataTab = lazy(() => import('~/components/@settings/tabs/data/DataTab').then(module => ({ default: module.DataTab }))); // Assuming DataTab is a named export
+const DebugTab = lazy(() => import('~/components/@settings/tabs/debug/DebugTab'));
+const EventLogsTab = lazy(() => import('~/components/@settings/tabs/event-logs/EventLogsTab').then(module => ({ default: module.EventLogsTab }))); // Assuming EventLogsTab is a named export
+const UpdateTab = lazy(() => import('~/components/@settings/tabs/update/UpdateTab'));
+const ConnectionsTab = lazy(() => import('~/components/@settings/tabs/connections/ConnectionsTab'));
+const CloudProvidersTab = lazy(() => import('~/components/@settings/tabs/providers/cloud/CloudProvidersTab'));
+const ServiceStatusTab = lazy(() => import('~/components/@settings/tabs/providers/status/ServiceStatusTab'));
+const LocalProvidersTab = lazy(() => import('~/components/@settings/tabs/providers/local/LocalProvidersTab'));
+const TaskManagerTab = lazy(() => import('~/components/@settings/tabs/task-manager/TaskManagerTab'));
+const TabManagement = lazy(() => import('~/components/@settings/shared/components/TabManagement').then(module => ({ default: module.TabManagement }))); // Assuming TabManagement is a named export
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-full w-full p-10">
+    <div className="i-svg-spinners:90-ring-with-bg text-3xl text-purple-500" />
+  </div>
+);
 
 interface ControlPanelProps {
   open: boolean;
@@ -116,7 +124,7 @@ const AnimatedSwitch = ({ checked, onCheckedChange, id, label }: AnimatedSwitchP
             'bg-white shadow-lg',
             'transition-shadow duration-300',
             'group-hover:shadow-md group-active:shadow-sm',
-            'group-hover:scale-95 group-active:scale-90',
+            // Removed group-hover:scale-95 group-active:scale-90 to prevent slight jump on small screens with less precise hover
           )}
           initial={false}
           transition={{
@@ -140,10 +148,10 @@ const AnimatedSwitch = ({ checked, onCheckedChange, id, label }: AnimatedSwitchP
         </motion.span>
         <span className="sr-only">Toggle {label}</span>
       </Switch>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center"> {/* Removed gap-2 here, will be handled by parent if needed */}
         <label
           htmlFor={id}
-          className="text-sm text-gray-500 dark:text-gray-400 select-none cursor-pointer whitespace-nowrap w-[88px]"
+          className="text-sm text-gray-500 dark:text-gray-400 select-none cursor-pointer whitespace-nowrap" // Removed fixed width w-[88px]
         >
           {label}
         </label>
@@ -432,9 +440,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
           >
             <motion.div
               className={classNames(
-                'w-[1200px] h-[90vh]',
+                'w-full sm:w-[95vw] md:w-[90vw] lg:w-[80vw] xl:w-[70vw] max-w-6xl h-full sm:h-[90vh] sm:max-h-[800px]', // Responsive panel size
                 'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
-                'rounded-2xl shadow-2xl',
+                'rounded-none sm:rounded-2xl shadow-2xl', // No rounding on full-screen mobile
                 'border border-[#E5E5E5] dark:border-[#1A1A1A]',
                 'flex flex-col overflow-hidden',
                 'relative',
@@ -449,8 +457,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
               </div>
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4 border-b border-gray-200 dark:border-gray-700"> {/* Responsive padding */}
+                  <div className="flex items-center space-x-2 sm:space-x-4"> {/* Responsive spacing */}
                     {(activeTab || showTabManagement) && (
                       <button
                         onClick={handleBack}
@@ -459,14 +467,14 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                         <div className="i-ph:arrow-left w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-purple-500 transition-colors" />
                       </button>
                     )}
-                    <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                    <DialogTitle className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate"> {/* Responsive font size and truncate */}
                       {showTabManagement ? 'Tab Management' : activeTab ? TAB_LABELS[activeTab] : 'Control Panel'}
                     </DialogTitle>
                   </div>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 sm:gap-4 md:gap-6"> {/* Responsive gap */}
                     {/* Mode Toggle */}
-                    <div className="flex items-center gap-2 min-w-[140px] border-r border-gray-200 dark:border-gray-800 pr-6">
+                    <div className="flex flex-col items-start xs:flex-row xs:items-center gap-1 xs:gap-2 xs:border-r border-gray-200 dark:border-gray-800 xs:pr-2 sm:pr-4 md:pr-6"> {/* Responsive layout, border, padding */}
                       <AnimatedSwitch
                         id="developer-mode"
                         checked={developerMode}
@@ -476,7 +484,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     </div>
 
                     {/* Avatar and Dropdown */}
-                    <div className="border-l border-gray-200 dark:border-gray-800 pl-6">
+                    {/* Avatar and Dropdown */}
+                    {/* Ensure pl- is responsive if border-l is sometimes hidden */}
+                    <div className="border-l border-gray-200 dark:border-gray-800 pl-2 sm:pl-4 md:pl-6"> {/* Responsive padding */}
                       <AvatarDropdown onSelectTab={handleTabClick} />
                     </div>
 
@@ -510,22 +520,25 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="p-6"
+                    className="p-3 sm:p-4 md:p-6" // Responsive padding for active tab content
                   >
-                    {showTabManagement ? (
-                      <TabManagement />
-                    ) : activeTab ? (
-                      getTabComponent(activeTab)
-                    ) : (
-                      <motion.div
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative"
+                    <Suspense fallback={<LoadingFallback />}>
+                      {showTabManagement ? (
+                        <TabManagement />
+                      ) : activeTab ? (
+                        getTabComponent(activeTab)
+                      ) : (
+                        <motion.div
+                        // Responsive grid columns and gap for TabTiles
+                        className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 relative"
                         variants={gridLayoutVariants}
                         initial="hidden"
                         animate="visible"
                       >
                         <AnimatePresence mode="popLayout">
                           {(visibleTabs as TabWithDevType[]).map((tab: TabWithDevType) => (
-                            <motion.div key={tab.id} layout variants={itemVariants} className="aspect-[1.5/1]">
+                            // Responsive aspect ratio / min-height for TabTile container
+                            <motion.div key={tab.id} layout variants={itemVariants} className="min-h-[100px] xs:min-h-[120px] sm:aspect-[1.5/1]">
                               <TabTile
                                 tab={tab}
                                 onClick={() => handleTabClick(tab.id as TabType)}
@@ -543,6 +556,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                         </AnimatePresence>
                       </motion.div>
                     )}
+                    </Suspense>
                   </motion.div>
                 </div>
               </div>

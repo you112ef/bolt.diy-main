@@ -32,8 +32,8 @@ const StarterTemplates: React.FC = () => {
   return (
     <div className="flex flex-col items-center gap-4">
       <span className="text-sm text-gray-500">or start a blank app with your favorite stack</span>
-      <div className="flex justify-center">
-        <div className="flex w-70 flex-wrap items-center justify-center gap-4">
+      <div className="flex justify-center w-full"> {/* Ensure parent can constrain width */}
+        <div className="flex w-full max-w-[17.5rem] flex-wrap items-center justify-center gap-4"> {/* Was w-70 (280px), now responsive */}
           {STARTER_TEMPLATES.map((template) => (
             <FrameworkLink key={template.name} template={template} />
           ))}
